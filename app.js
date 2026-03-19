@@ -1110,14 +1110,15 @@ function renderFood() {
     const body = document.getElementById('fd-body');
     body.innerHTML = indexed.map(({f,i}) => {
         const igBadge = f.ingredients ? ' <span style="font-size:10px;color:#1976d2" title="含食材明细">📋</span>' : '';
-        const g = extractGrams(f.amount);
+        const g = extractGrams(f.amount, f.qty, f.unit);
         const kcalCell = fmtPer100(f.kcal, g, 'kcal');
         const proteinCell = fmtPer100(f.protein, g, 'g');
         const carbCell = fmtPer100(f.carb, g, 'g');
         const fatCell = fmtPer100(f.fat, g, 'g');
         const sodiumCell = f.sodium ? fmtPer100(f.sodium, g, 'mg') : '-';
         const fiberCell = f.fiber ? fmtPer100(f.fiber, g, 'g') : '-';
-        return `<tr><td>${f.meal}</td><td>${f.name}${igBadge}</td><td>${f.amount}</td><td>${kcalCell}</td><td>${proteinCell}</td><td>${carbCell}</td><td>${fatCell}</td><td>${fiberCell}</td><td>${sodiumCell}</td><td class="action-cell"><button class="edit-btn" data-onclick="editFood(${i})">✏️</button><span class="del-btn" data-onclick="delFood(${i})">✕</span></td></tr>`;
+        const amountDisplay = (f.qty != null ? f.qty : '') + (f.unit || '');
+        return `<tr><td>${f.meal}</td><td>${f.name}${igBadge}</td><td>${amountDisplay}</td><td>${kcalCell}</td><td>${proteinCell}</td><td>${carbCell}</td><td>${fatCell}</td><td>${fiberCell}</td><td>${sodiumCell}</td><td class="action-cell"><button class="edit-btn" data-onclick="editFood(${i})">✏️</button><span class="del-btn" data-onclick="delFood(${i})">✕</span></td></tr>`;
     }).join('') || '<tr><td colspan="10" style="text-align:center;color:#999">还没记录饮食</td></tr>';
     const total = Math.round(foods.reduce((s,f) => s + f.kcal, 0));
     const proteinTotal = foods.reduce((s,f) => s + (f.protein||0), 0);
