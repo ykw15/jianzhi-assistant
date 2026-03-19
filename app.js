@@ -293,6 +293,10 @@ function saveData() {
     if (day) day._ts = Date.now();
     
     localStorage.setItem(LS_KEY, JSON.stringify(data));
+    // v35: 立即触发页面间同步
+    if (typeof broadcastDataChange === 'function') {
+        broadcastDataChange();
+    }
     scheduleSyncAfterSave();
 }
 function getDay(d) { if(!data.days[d]) data.days[d]={exercises:[],foods:[],weight:null}; return data.days[d]; }
