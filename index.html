@@ -137,6 +137,14 @@ var IMPORTED_HEALTH_DATA = {"profile": {"name": "许鹏", "gender": "male", "bir
         .water-sparkle span{position:absolute;font-size:16px;animation:sparkle 1s ease forwards}
         @media(max-width:600px){body{padding:8px}.header{flex-direction:column;text-align:center}.form-row{flex-direction:column;align-items:stretch}.form-row label{min-width:auto}.water-cup{width:38px;height:48px}}
     </style>
+
+<script>
+// v32: 页面间同步函数（必须在 app.js 之前定义）
+function broadcastDataChange() {
+    localStorage.setItem('health_tracker_v1', localStorage.getItem('health_tracker_v1'));
+}
+</script>
+
 </head>
 <body>
 <div class="container">
@@ -848,10 +856,7 @@ window.addEventListener('storage', function(e) {
     }
 });
 
-// 数据保存后广播给其他页面
-function broadcastDataChange() {
-    localStorage.setItem('health_tracker_v1', localStorage.getItem('health_tracker_v1'));
-}
+// 数据保存后广播给其他页面 - 已移到 head
 </script>
 
 </body>
