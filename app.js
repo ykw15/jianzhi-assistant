@@ -1670,7 +1670,7 @@ function addHemaFood(index) {
 // ===== 盒马食物库 =====
 var _hemaDB = null;
 function loadHemaDB() {
-    var url = 'https://s3plus-bj02.vip.sankuai.com/openclaw-bucket/health-dashboard/hema-food-db.json?t=' + Date.now();
+    var url = 'https://raw.githubusercontent.com/ykw15/jianzhi-assistant/main/hema-food-db.json?t=' + Date.now();
     fetch(url).then(function(r){return r.json()}).then(function(db){
         _hemaDB = db;
         renderHemaDB();
