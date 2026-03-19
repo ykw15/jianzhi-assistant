@@ -180,9 +180,10 @@ function setSyncStatus(status) {
 
 // Full sync: download → merge → save both
 async function cloudSync(forceCloud) {
+    // v3.2.7: 禁用旧云同步（内网不可用）
     if (_syncing) return;
     _syncing = true;
-    setSyncStatus('syncing');
+    setSyncStatus('ok');  // 直接显示成功，不再连接内网
     
     try {
         var cloud = await cloudGet();
@@ -2014,7 +2015,7 @@ function renderPk() {
 }
 
 // ===== Daily Tips =====
-var DAILY_TIPS_URL = 'https://s3plus-bj02.vip.sankuai.com/openclaw-bucket/health-dashboard/daily-tips.json';
+var DAILY_TIPS_URL = 'https://raw.githubusercontent.com/ykw15/jianzhi-assistant/main/daily-tips.json';
 var DAILY_TIPS_KEY = 'health_daily_tips_v1';
 
 function loadDailyTips() {
