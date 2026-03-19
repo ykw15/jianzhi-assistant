@@ -180,20 +180,34 @@ function setSyncStatus(status) {
 
 // Full sync: download → merge → save both
 async function cloudSync(forceCloud) {
-    // v3.1.1: 禁用旧云同步，使用 GitHub 私有仓库
     if (_syncing) return;
     _syncing = true;
-    setSyncStatus('ok');
-    _lastSyncTime = Date.now();
+    setSyncStatus('syncing');
     
-    // 只刷新 UI，不连接旧云端
-    loadProfile();
-    calcMetrics();
-    updateAll();
-    renderWater();
-    
-    if (forceCloud) {
-        alert('✅ 数据已刷新！');
+    try {
+        var cloud = await cloudGet();
+        var local = loadData();
+        
+        if (cloud) {
+            // forceCloud=true: 直接用云端数据，不merge（用于强制刷新）
+            var merged = forceCloud ? cloud : mergeData(local, cloud);
+            data = merged;
+            localStorage.setItem(LS_KEY, JSON.stringify(data));
+        }
+        
+        // Upload merged (or local if no cloud)
+        var ok = await cloudPut(data);
+        setSyncStatus(ok ? 'ok' : 'error');
+        _lastSyncTime = Date.now();
+        
+        // Refresh UI with synced data
+        loadProfile();
+        calcMetrics();
+        updateAll();
+        renderWater();
+
+        if (forceCloud) {
+            alert('✅ 已从云端强制刷新数据！');
         }
     } catch(e) {
         console.warn('[sync] error:', e);
@@ -250,12 +264,6 @@ function saveData() {
     if (day) day._ts = Date.now();
     
     localStorage.setItem(LS_KEY, JSON.stringify(data));
-    
-    // v3.1.0: 同步到云端
-    if (typeof window._saveToCloud === 'function') {
-        window._saveToCloud(data);
-    }
-    
     scheduleSyncAfterSave();
 }
 function getDay(d) { if(!data.days[d]) data.days[d]={exercises:[],foods:[],weight:null}; return data.days[d]; }
@@ -1351,8 +1359,6 @@ function switchTab(name) {
     document.querySelectorAll('.tab').forEach(function(el) {
         if(el.getAttribute('data-onclick') === "switchTab('" + name + "')") el.classList.add('active');
     });
-    // v3.0.3: 切换 tab 时刷新所有数据
-    if(typeof updateAll === 'function') { try { updateAll(); } catch(e){} }
     if(name === 'log' || name === 'profile') { try { renderLog(); renderWeightChart(); } catch(e){} }
     if(name === 'diet') { try { renderMealPieCharts(); } catch(e){} }
 }
