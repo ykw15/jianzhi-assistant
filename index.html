@@ -133,111 +133,6 @@
     </style>
 
 <script>
-// v3.0.1: BroadcastChannel 数据同步
-(function() {
-    const BC_NAME = 'health-sync-channel';
-    let bc = null;
-    
-    // 初始化 BroadcastChannel
-    function initSync() {
-        if (typeof BroadcastChannel !== 'undefined') {
-            bc = new BroadcastChannel(BC_NAME);
-            bc.onmessage = function(e) {
-                if (e.data && e.data.type === 'data-updated') {
-                    console.log('[v3.0.1] 收到同步消息，刷新数据');
-                    refreshFromStorage();
-                }
-            };
-            console.log('[v3.0.1] BroadcastChannel 已初始化');
-        } else {
-            console.log('[v3.0.1] BroadcastChannel 不支持，使用 storage 事件');
-            window.addEventListener('storage', function(e) {
-                if (e.key === 'health_tracker_v1') {
-                    refreshFromStorage();
-                }
-            });
-        }
-    }
-    
-    // 广播数据更新
-    window.broadcastUpdate = function() {
-        if (bc) {
-            bc.postMessage({ type: 'data-updated', time: Date.now() });
-        }
-        // 同时触发 storage 事件作为备用
-        const data = localStorage.getItem('health_tracker_v1');
-        localStorage.setItem('health_tracker_v1_temp', data);
-        localStorage.removeItem('health_tracker_v1_temp');
-    };
-    
-    // 从 storage 刷新数据到页面
-    function refreshFromStorage() {
-        if (typeof data !== 'undefined' && typeof loadData === 'function') {
-            const newData = JSON.parse(localStorage.getItem('health_tracker_v1') || '{"profile":{},"days":{}}');
-            Object.assign(data, newData);
-            if (typeof updateAll === 'function') {
-                updateAll();
-            }
-            console.log('[v3.0.1] 数据已同步');
-        }
-    }
-    
-    // 页面可见性变化时同步
-    document.addEventListener('visibilitychange', function() {
-        if (!document.hidden) {
-            refreshFromStorage();
-        }
-    });
-    
-    // 初始化
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initSync);
-    } else {
-        initSync();
-    }
-})();
-</script>
-
-
-<script>
-// v3.0.2: 页面可见性同步方案
-(function() {
-    // 页面从后台切回前台时刷新数据
-    document.addEventListener('visibilitychange', function() {
-        if (!document.hidden && typeof window.refreshData === 'function') {
-            console.log('[v3.0.2] 页面激活，刷新数据');
-            window.refreshData();
-        }
-    });
-    
-    // 提供全局刷新函数
-    window.refreshData = function() {
-        try {
-            const LS_KEY = 'health_tracker_v1';
-            const raw = localStorage.getItem(LS_KEY);
-            if (!raw) return;
-            
-            const newData = JSON.parse(raw);
-            if (typeof data !== 'undefined') {
-                // 合并数据
-                data.profile = newData.profile || data.profile;
-                data.days = newData.days || data.days;
-                
-                // 刷新 UI
-                if (typeof updateAll === 'function') {
-                    updateAll();
-                    console.log('[v3.0.2] 数据已刷新');
-                }
-            }
-        } catch(e) {
-            console.error('[v3.0.2] 刷新失败:', e);
-        }
-    };
-})();
-</script>
-
-
-<script>
 // v3.1.0: GitHub 私有仓库云端同步
 (function() {
     const GITHUB_API = 'https://api.github.com';
@@ -977,6 +872,6 @@
 </div>
 
 <script src="./chart.js"></script>
-<script src="./app.js?v=312"></script>
+<script src="./app.js"></script>
 </body>
 </html>
