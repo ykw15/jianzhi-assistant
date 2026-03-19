@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "export_time": "2026-03-19 19:05:00",
-    "total": 12,
+    "export_time": "2026-03-19 19:30:00",
+    "total": 13,
     "description": "盒马食材营养数据库，含每100g营养值、配料表、食用记录"
   },
   "foods": [
@@ -828,6 +828,45 @@
       ],
       "hema_price": null,
       "hema_url": null
+    },
+    {
+      "name": "椒麻猪肝",
+      "sample_amount": "200g",
+      "per100g": {
+        "kcal": 317.5,
+        "protein": 14.4,
+        "carb": 6.5,
+        "fat": 26.4,
+        "sodium": 543.0,
+        "fiber": 0.0
+      },
+      "total": {
+        "kcal": 635.0,
+        "protein": 28.8,
+        "carb": 13.0,
+        "fat": 52.8,
+        "sodium": 1086.0,
+        "fiber": 0.0
+      },
+      "ingredients": [
+        {
+          "role": "主料",
+          "name": "猪肝",
+          "weight": "≥60%"
+        },
+        {
+          "role": "辅料",
+          "name": "花椒",
+          "weight": null
+        }
+      ],
+      "tags": [
+        "盒马",
+        "熟食",
+        "高蛋白"
+      ],
+      "times_eaten": 1,
+      "needs_photo": false
     }
   ]
 }
