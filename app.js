@@ -125,7 +125,8 @@ async function cloudPut(obj) {
 }
 
 // Download data from cloud (public read, no auth needed)
-async function cloudGet() {
+async function cloudGet() { return null; // v36: 禁用云端
+    /*
     try {
         var resp = await fetch(s3Url() + '?t=' + Date.now());
         if (!resp.ok) return null;
@@ -134,7 +135,7 @@ async function cloudGet() {
         console.warn('[sync] GET failed:', e);
         return null;
     }
-}
+} */
 
 // Merge: 云端优先策略
 // 云端是权威数据源（可能被后端/agent更新），本地只在没有云端时才用
@@ -180,34 +181,19 @@ function setSyncStatus(status) {
 
 // Full sync: download → merge → save both
 async function cloudSync(forceCloud) {
+    // v36: 禁用云端同步，仅本地存储
     if (_syncing) return;
     _syncing = true;
-    setSyncStatus('syncing');
+    setSyncStatus('ok');  // 直接显示成功
     
-    try {
-        var cloud = await cloudGet();
-        var local = loadData();
-        
-        if (cloud) {
-            // forceCloud=true: 直接用云端数据，不merge（用于强制刷新）
-            var merged = forceCloud ? cloud : mergeData(local, cloud);
-            data = merged;
-            localStorage.setItem(LS_KEY, JSON.stringify(data));
-        }
-        
-        // Upload merged (or local if no cloud)
-        var ok = await cloudPut(data);
-        setSyncStatus(ok ? 'ok' : 'error');
-        _lastSyncTime = Date.now();
-        
-        // Refresh UI with synced data
-        loadProfile();
-        calcMetrics();
-        updateAll();
-        renderWater();
-
-        if (forceCloud) {
-            alert('✅ 已从云端强制刷新数据！');
+    // 本地数据已保存，刷新 UI 即可
+    loadProfile();
+    calcMetrics();
+    updateAll();
+    renderWater();
+    
+    if (forceCloud) {
+        alert('✅ 数据已刷新！');
         }
     } catch(e) {
         console.warn('[sync] error:', e);
