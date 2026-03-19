@@ -809,5 +809,50 @@ var IMPORTED_HEALTH_DATA = {"profile": {"name": "许鹏", "gender": "male", "bir
 
 <script src="./chart.js"></script>
 <script src="./app.js"></script>
+
+<!-- 数据同步机制 v31 -->
+<script>
+// 数据合并函数：将导入数据写入 localStorage
+function mergeImportedData() {
+    var LS_KEY = 'health_tracker_v1';
+    if (typeof IMPORTED_HEALTH_DATA !== 'undefined' && IMPORTED_HEALTH_DATA) {
+        var localData = JSON.parse(localStorage.getItem(LS_KEY) || '{"profile":{},"days":{}}');
+        
+        // 合并 profile
+        if (IMPORTED_HEALTH_DATA.profile && Object.keys(IMPORTED_HEALTH_DATA.profile).length > 0) {
+            if (!localData.profile || Object.keys(localData.profile).length === 0) {
+                localData.profile = IMPORTED_HEALTH_DATA.profile;
+            }
+        }
+        
+        // 合并 days（只添加不覆盖）
+        if (IMPORTED_HEALTH_DATA.days) {
+            for (var date in IMPORTED_HEALTH_DATA.days) {
+                if (!localData.days[date]) {
+                    localData.days[date] = IMPORTED_HEALTH_DATA.days[date];
+                }
+            }
+        }
+        
+        localStorage.setItem(LS_KEY, JSON.stringify(localData));
+        console.log('[v31] 历史数据已导入: ' + Object.keys(IMPORTED_HEALTH_DATA.days || {}).length + '天');
+    }
+}
+
+// 页面间同步：监听其他页面的 localStorage 变化
+window.addEventListener('storage', function(e) {
+    if (e.key === 'health_tracker_v1' && e.newValue) {
+        console.log('[v31] 检测到其他页面数据变化，自动刷新');
+        // 触发自定义事件，让页面刷新数据
+        window.dispatchEvent(new CustomEvent('dataSync', { detail: JSON.parse(e.newValue) }));
+    }
+});
+
+// 数据保存后广播给其他页面
+function broadcastDataChange() {
+    localStorage.setItem('health_tracker_v1', localStorage.getItem('health_tracker_v1'));
+}
+</script>
+
 </body>
 </html>
