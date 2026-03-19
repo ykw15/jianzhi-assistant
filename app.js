@@ -180,23 +180,21 @@ function setSyncStatus(status) {
 }
 
 // Full sync: download → merge → save both
-// v36: 禁用云端同步，仅本地存储
 async function cloudSync(forceCloud) {
+    // v36: 禁用云端同步，仅本地存储
     if (_syncing) return;
     _syncing = true;
-    setSyncStatus('ok');
-    
+    setSyncStatus('ok');  // 直接显示成功
     try {
-        // 本地数据已保存，刷新 UI 即可
-        loadProfile();
-        calcMetrics();
-        updateAll();
-        renderWater();
-        
-        if (forceCloud) {
-            alert('✅ 数据已刷新！');
-        }
-        _lastSyncTime = Date.now();
+    // 本地数据已保存，刷新 UI 即可
+    loadProfile();
+    calcMetrics();
+    updateAll();
+    renderWater();
+    
+    if (forceCloud) {
+        alert('✅ 数据已刷新！');
+    }
     } catch(e) {
         console.warn('[sync] error:', e);
         setSyncStatus('error');
