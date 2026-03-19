@@ -154,10 +154,11 @@
             const res = await fetch(url, { headers: { 'Authorization': 'token ' + TOKEN, 'Accept': 'application/vnd.github.v3+json' } });
             if (!res.ok) return null;
             const d = await res.json();
-            const bytes = atob(d.content.replace(/\n/g, ''));
+            const base64 = d.content.replace(/\s/g, '');
+            const bytes = atob(base64);
             const decoded = decodeURIComponent(escape(bytes));
             return JSON.parse(decoded);
-        } catch(e) { console.log('[v3.2.3] 加载失败:', e.message); return null; }
+        } catch(e) { console.log('[v3.2.4] 加载失败:', e.message); return null; }
     }
     
     // 保存到云端
@@ -168,17 +169,17 @@
             try { const r = await fetch(getUrl, { headers: { 'Authorization': 'token ' + TOKEN } }); if (r.ok) sha = (await r.json()).sha; } catch(e) {}
             
             const jsonStr = JSON.stringify(data);
-            const bytes = unescape(encodeURIComponent(jsonStr));
-            const base64 = btoa(bytes);
+            const encoded = encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1));
+            const base64 = btoa(encoded);
             const body = { message: '更新健康数据', content: base64, branch: BRANCH };
             if (sha) body.sha = sha;
             
             const res = await fetch(GITHUB_API+'/repos/'+OWNER+'/'+REPO+'/contents/'+FILE_PATH, {
                 method: 'PUT', headers: { 'Authorization': 'token ' + TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify(body)
             });
-            if (res.ok) { console.log('[v3.2.3] ☁️ 已同步到云端'); return true; }
+            if (res.ok) { console.log('[v3.2.4] ☁️ 已同步到云端'); return true; }
             return false;
-        } catch(e) { console.log('[v3.2.3] 同步失败:', e.message); return false; }
+        } catch(e) { console.log('[v3.2.4] 同步失败:', e.message); return false; }
     };
     
     // 初始化：加载云端数据并合并
@@ -192,7 +193,7 @@
             }
             if (cloud.profile && Object.keys(cloud.profile).length > 0) local.profile = cloud.profile;
             localStorage.setItem('health_tracker_v1', JSON.stringify(local));
-            console.log('[v3.2.3] ☁️ 云端数据已合并');
+            console.log('[v3.2.4] ☁️ 云端数据已合并');
             // 刷新 UI
             if (typeof updateAll === 'function') setTimeout(updateAll, 100);
         }
