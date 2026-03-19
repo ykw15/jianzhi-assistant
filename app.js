@@ -2664,3 +2664,4 @@ function renderWeightChart() {
         }
     }, 200);
 })();
+
