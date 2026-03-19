@@ -198,6 +198,44 @@
 })();
 </script>
 
+
+<script>
+// v3.0.2: 页面可见性同步方案
+(function() {
+    // 页面从后台切回前台时刷新数据
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden && typeof window.refreshData === 'function') {
+            console.log('[v3.0.2] 页面激活，刷新数据');
+            window.refreshData();
+        }
+    });
+    
+    // 提供全局刷新函数
+    window.refreshData = function() {
+        try {
+            const LS_KEY = 'health_tracker_v1';
+            const raw = localStorage.getItem(LS_KEY);
+            if (!raw) return;
+            
+            const newData = JSON.parse(raw);
+            if (typeof data !== 'undefined') {
+                // 合并数据
+                data.profile = newData.profile || data.profile;
+                data.days = newData.days || data.days;
+                
+                // 刷新 UI
+                if (typeof updateAll === 'function') {
+                    updateAll();
+                    console.log('[v3.0.2] 数据已刷新');
+                }
+            }
+        } catch(e) {
+            console.error('[v3.0.2] 刷新失败:', e);
+        }
+    };
+})();
+</script>
+
 </head>
 <body>
 <div class="container">
