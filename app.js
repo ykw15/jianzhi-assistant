@@ -2136,7 +2136,7 @@ function appInit() {
     // Initial cloud sync
     _syncing = false;
     _syncEnabled = false;
-    // cloudSync disabled - // cloudSync().then(function() {
+    cloudSync().then(function() {
         _syncEnabled = true;
         // Re-render after cloud sync brings in fresh data
         try { loadProfile(); calcMetrics(); updateAll(); renderWater(); } catch(e) {}
@@ -2670,54 +2670,3 @@ function renderWeightChart() {
         }
     }, 200);
 })();
-
-
-// ===== 数据导出导入功能 =====
-function exportData() {
-    const dataStr = JSON.stringify(data, null, 2);
-    const blob = new Blob([dataStr], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'health-data-' + new Date().toISOString().slice(0,10) + '.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    alert('✅ 数据已导出');
-}
-
-function importData(file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const imported = JSON.parse(e.target.result);
-            if (imported.profile && imported.days) {
-                data = imported;
-                saveData();
-                loadProfile();
-                renderAll();
-                alert('✅ 数据导入成功！共 ' + Object.keys(data.days).length + ' 天数据');
-            } else {
-                alert('❌ 数据格式不正确');
-            }
-        } catch(err) {
-            alert('❌ 导入失败: ' + err.message);
-        }
-    };
-    reader.readAsText(file);
-}
-
-function createImportButton() {
-    // 在设置页面添加导入导出按钮
-    const section = document.getElementById('sec-profile');
-    if (section) {
-        const btnDiv = document.createElement('div');
-        btnDiv.style.marginTop = '16px';
-        btnDiv.innerHTML = '<button class="btn btn-outline" onclick="exportData()">📤 导出数据</button> ' +
-            '<input type="file" id="import-file" style="display:none" onchange="importData(this.files[0])">' +
-            '<button class="btn btn-outline" onclick="document.getElementById('import-file').click()">📥 导入数据</button>';
-        section.appendChild(btnDiv);
-    }
-}
-
-// 页面加载后创建按钮
-setTimeout(createImportButton, 1000);
