@@ -2136,7 +2136,7 @@ function appInit() {
     // Initial cloud sync
     _syncing = false;
     _syncEnabled = false;
-    cloudSync().then(function() {
+    // cloudSync disabled - // cloudSync().then(function() {
         _syncEnabled = true;
         // Re-render after cloud sync brings in fresh data
         try { loadProfile(); calcMetrics(); updateAll(); renderWater(); } catch(e) {}
