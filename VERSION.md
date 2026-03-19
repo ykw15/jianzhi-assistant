@@ -1,11 +1,15 @@
 # 减脂助手看板版本记录
 
+## v35 (2026-03-19 16:55)
+- 修复：saveData 立即触发 broadcastDataChange（无需等待3秒）
+- 添加调试日志
+- storage 事件触发后自动刷新页面数据
+
 ## v34 (2026-03-19 16:45)
-- 修复：storage 事件触发后自动刷新页面数据
-- 直接调用 loadData 和 updateAll 刷新 UI
+- storage 事件触发后自动刷新页面数据
 
 ## v33 (2026-03-19 16:30)
-- 修复：broadcastDataChange 移到 head
+- broadcastDataChange 移到 head
 
 ## v32 (2026-03-19 16:20)
 - 保存数据后触发页面同步
