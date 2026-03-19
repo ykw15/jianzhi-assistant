@@ -859,50 +859,27 @@ function createImportButton() {
 setTimeout(createImportButton, 1000);
 
 
+<!-- 数据导入合并逻辑 -->
 <script>
-function exportData() {
-    const dataStr = JSON.stringify(data, null, 2);
-    const blob = new Blob([dataStr], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'health-data-' + new Date().toISOString().slice(0,10) + '.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    alert('✅ 数据已导出');
-}
-function importData(file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const imported = JSON.parse(e.target.result);
-            if (imported.profile && imported.days) {
-                data = imported;
-                saveData();
-                loadProfile();
-                renderAll();
-                alert('✅ 数据导入成功！共 ' + Object.keys(data.days).length + ' 天数据');
-            } else {
-                alert('❌ 数据格式不正确');
-            }
-        } catch(err) {
-            alert('❌ 导入失败: ' + err.message);
+(function() {
+    if (typeof IMPORTED_HEALTH_DATA !== 'undefined' && IMPORTED_HEALTH_DATA) {
+        var LS_KEY = 'health_tracker_v1';
+        var localData = JSON.parse(localStorage.getItem(LS_KEY) || '{"profile":{},"days":{}}');
+        
+        // 合并 profile
+        if (IMPORTED_HEALTH_DATA.profile) {
+            Object.assign(localData.profile, IMPORTED_HEALTH_DATA.profile);
         }
-    };
-    reader.readAsText(file);
-}
-function createImportButton() {
-    const section = document.getElementById('sec-profile');
-    if (section) {
-        const btnDiv = document.createElement('div');
-        btnDiv.style.marginTop = '16px';
-        btnDiv.innerHTML = '<button class="btn btn-outline" onclick="exportData()">📤 导出数据</button> ' +
-            '<input type="file" id="import-file" style="display:none" onchange="importData(this.files[0])">' +
-            '<button class="btn btn-outline" onclick="document.getElementById(\'import-file\').click()">📥 导入数据</button>';
-        section.appendChild(btnDiv);
+        // 合并 days
+        if (IMPORTED_HEALTH_DATA.days) {
+            for (var date in IMPORTED_HEALTH_DATA.days) {
+                localData.days[date] = IMPORTED_HEALTH_DATA.days[date];
+            }
+        }
+        localStorage.setItem(LS_KEY, JSON.stringify(localData));
+        console.log('历史数据已导入: ' + Object.keys(IMPORTED_HEALTH_DATA.days || {}).length + '天');
     }
-}
-setTimeout(createImportButton, 1000);
+})();
 </script>
 
 </body>
