@@ -141,6 +141,7 @@ var IMPORTED_HEALTH_DATA = {"profile": {"name": "许鹏", "gender": "male", "bir
 <script>
 // v32: 页面间同步函数（必须在 app.js 之前定义）
 function broadcastDataChange() {
+        console.log('[DEBUG] broadcastDataChange 被调用');
     localStorage.setItem('health_tracker_v1', localStorage.getItem('health_tracker_v1'));
 }
 </script>
@@ -850,6 +851,7 @@ function mergeImportedData() {
 // 页面间同步：监听其他页面的 localStorage 变化
 window.addEventListener('storage', function(e) {
     if (e.key === 'health_tracker_v1' && e.newValue) {
+        console.log('[DEBUG] storage 事件触发: key=' + e.key);
         console.log('[v33] 检测到其他页面数据变化，3秒后自动刷新');
         // 延迟一下让数据写完
         setTimeout(function() {
