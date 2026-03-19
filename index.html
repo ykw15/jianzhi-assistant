@@ -181,18 +181,29 @@
         const cloud = await loadFromCloud();
         if (cloud && cloud.days && Object.keys(cloud.days).length > 0) {
             const local = JSON.parse(localStorage.getItem('health_tracker_v1') || '{"profile":{},"days":{}}');
-            // 合并：以时间戳较新的为准
+            // 合并：云端优先（直接覆盖本地）
             for (let d in cloud.days) {
-                const cDay = cloud.days[d], lDay = local.days[d];
-                if (!lDay || (cDay._ts && lDay._ts && cDay._ts > lDay._ts)) {
-                    local.days[d] = cDay;
-                }
+                local.days[d] = cloud.days[d];
             }
-            if (cloud.profile && Object.keys(cloud.profile).length > 0) local.profile = cloud.profile;
+            if (cloud.profile && Object.keys(cloud.profile).length > 0) {
+                local.profile = cloud.profile;
+            }
             localStorage.setItem('health_tracker_v1', JSON.stringify(local));
+            
+            // 更新全局 data 变量并刷新 UI
+            if (typeof data !== 'undefined') {
+                data.days = local.days;
+                data.profile = local.profile;
+            }
             console.log('[v3.2.0] ☁️ 云端数据已合并');
+            
             // 刷新 UI
-            if (typeof updateAll === 'function') setTimeout(updateAll, 100);
+            if (typeof updateAll === 'function') {
+                setTimeout(function() {
+                    updateAll();
+                    console.log('[v3.2.0] UI 已刷新');
+                }, 200);
+            }
         }
     }
     
