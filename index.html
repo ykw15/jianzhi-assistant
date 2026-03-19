@@ -133,7 +133,7 @@
     </style>
 
 <script>
-// v3.3.5: GitHub 私有仓库云端同步（改进版）
+// v3.3.6: GitHub 私有仓库云端同步（改进版）
 (function() {
     const GITHUB_API = 'https://api.github.com';
     const OWNER = 'ykw15';
@@ -158,7 +158,7 @@
             const bytes = atob(base64);
             const decoded = decodeURIComponent(escape(bytes));
             return JSON.parse(decoded);
-        } catch(e) { console.log('[v3.3.5] 加载失败:', e.message); return null; }
+        } catch(e) { console.log('[v3.3.6] 加载失败:', e.message); return null; }
     }
     
     // 保存到云端
@@ -177,9 +177,9 @@
             const res = await fetch(GITHUB_API+'/repos/'+OWNER+'/'+REPO+'/contents/'+FILE_PATH, {
                 method: 'PUT', headers: { 'Authorization': 'token ' + TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify(body)
             });
-            if (res.ok) { console.log('[v3.3.5] ☁️ 已同步到云端'); return true; }
+            if (res.ok) { console.log('[v3.3.6] ☁️ 已同步到云端'); return true; }
             return false;
-        } catch(e) { console.log('[v3.3.5] 同步失败:', e.message); return false; }
+        } catch(e) { console.log('[v3.3.6] 同步失败:', e.message); return false; }
     };
     
     // 初始化：加载云端数据并合并
@@ -189,11 +189,22 @@
             const local = JSON.parse(localStorage.getItem('health_tracker_v1') || '{"profile":{},"days":{}}');
             // 合并：云端数据覆盖本地（无条件）
             for (let d in cloud.days) {
-                local.days[d] = cloud.days[d];
+                const cDay = cloud.days[d];
+                if (!local.days[d]) local.days[d] = {};
+                // 合并 foods
+                if (cDay.foods) local.days[d].foods = cDay.foods;
+                // 合并 exercises
+                if (cDay.exercises) local.days[d].exercises = cDay.exercises;
+                // 合并 water
+                if (cDay.water !== undefined) local.days[d].water = cDay.water;
+                // 合并 weight
+                if (cDay.weight !== undefined) local.days[d].weight = cDay.weight;
+                // 合并 _ts
+                if (cDay._ts) local.days[d]._ts = cDay._ts;
             }
             if (cloud.profile && Object.keys(cloud.profile).length > 0) local.profile = cloud.profile;
             localStorage.setItem('health_tracker_v1', JSON.stringify(local));
-            console.log('[v3.3.5] ☁️ 云端数据已合并');
+            console.log('[v3.3.6] ☁️ 云端数据已合并');
             // 刷新 UI
             if (typeof updateAll === 'function') setTimeout(updateAll, 100);
         }
