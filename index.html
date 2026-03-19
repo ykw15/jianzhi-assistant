@@ -133,7 +133,7 @@
     </style>
 
 <script>
-// v3.2.1: GitHub 私有仓库云端同步（改进版）
+// v3.2.0: GitHub 私有仓库云端同步（改进版）
 (function() {
     const GITHUB_API = 'https://api.github.com';
     const OWNER = 'ykw15';
@@ -155,7 +155,7 @@
             if (!res.ok) return null;
             const d = await res.json();
             return JSON.parse(atob(d.content.replace(/\n/g, '')));
-        } catch(e) { console.log('[v3.2.1] 加载失败:', e.message); return null; }
+        } catch(e) { console.log('[v3.2.2] 加载失败:', e.message); return null; }
     }
     
     // 保存到云端
@@ -171,9 +171,9 @@
             const res = await fetch(GITHUB_API+'/repos/'+OWNER+'/'+REPO+'/contents/'+FILE_PATH, {
                 method: 'PUT', headers: { 'Authorization': 'token ' + TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify(body)
             });
-            if (res.ok) { console.log('[v3.2.1] ☁️ 已同步到云端'); return true; }
+            if (res.ok) { console.log('[v3.2.2] ☁️ 已同步到云端'); return true; }
             return false;
-        } catch(e) { console.log('[v3.2.1] 同步失败:', e.message); return false; }
+        } catch(e) { console.log('[v3.2.2] 同步失败:', e.message); return false; }
     };
     
     // 初始化：加载云端数据并合并
@@ -181,16 +181,13 @@
         const cloud = await loadFromCloud();
         if (cloud && cloud.days && Object.keys(cloud.days).length > 0) {
             const local = JSON.parse(localStorage.getItem('health_tracker_v1') || '{"profile":{},"days":{}}');
-            // 合并：以时间戳较新的为准
+            // 合并：云端数据覆盖本地（无条件）
             for (let d in cloud.days) {
-                const cDay = cloud.days[d], lDay = local.days[d];
-                if (!lDay || (cDay._ts && lDay._ts && cDay._ts > lDay._ts)) {
-                    local.days[d] = cDay;
-                }
+                local.days[d] = cloud.days[d];
             }
             if (cloud.profile && Object.keys(cloud.profile).length > 0) local.profile = cloud.profile;
             localStorage.setItem('health_tracker_v1', JSON.stringify(local));
-            console.log('[v3.2.1] ☁️ 云端数据已合并');
+            console.log('[v3.2.2] ☁️ 云端数据已合并');
             // 刷新 UI
             if (typeof updateAll === 'function') setTimeout(updateAll, 100);
         }
