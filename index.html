@@ -133,7 +133,7 @@
     </style>
 
 <script>
-// v3.2.0: GitHub 私有仓库云端同步（改进版）
+// v3.1.0: GitHub 私有仓库云端同步
 (function() {
     const GITHUB_API = 'https://api.github.com';
     const OWNER = 'ykw15';
@@ -152,105 +152,52 @@
         try {
             const url = GITHUB_API+'/repos/'+OWNER+'/'+REPO+'/contents/'+FILE_PATH+'?ref='+BRANCH;
             const res = await fetch(url, { headers: { 'Authorization': 'token ' + TOKEN, 'Accept': 'application/vnd.github.v3+json' } });
-            if (!res.ok) { console.log('[v3.2.0] 云端无数据'); return null; }
+            if (!res.ok) return null;
             const d = await res.json();
-            const content = atob(d.content.replace(/\s/g, ''));
-            return JSON.parse(content);
-        } catch(e) { console.log('[v3.2.0] 加载失败:', e.message); return null; }
+            return JSON.parse(atob(d.content.replace(/\n/g, '')));
+        } catch(e) { console.log('[v3.1.0] 云端加载失败:', e.message); return null; }
     }
     
     // 保存到云端
-    window._saveToCloud = async function(healthData) {
+    window._saveToCloud = async function(data) {
         try {
-            // 获取当前 SHA
             const getUrl = GITHUB_API+'/repos/'+OWNER+'/'+REPO+'/contents/'+FILE_PATH+'?ref='+BRANCH;
             let sha = null;
-            try { 
-                const r = await fetch(getUrl, { headers: { 'Authorization': 'token ' + TOKEN } }); 
-                if (r.ok) sha = (await r.json()).sha; 
-            } catch(e) {}
+            try { const r = await fetch(getUrl, { headers: { 'Authorization': 'token ' + TOKEN } }); if (r.ok) sha = (await r.json()).sha; } catch(e) {}
             
-            // 准备数据
-            const jsonStr = JSON.stringify(healthData);
-            const content = btoa(unescape(encodeURIComponent(jsonStr)));
-            const body = { message: '更新健康数据', content: content, branch: BRANCH };
+            const body = { message: '更新健康数据', content: btoa(unescape(encodeURIComponent(JSON.stringify(data)))), branch: BRANCH };
             if (sha) body.sha = sha;
             
-            // 上传
             const res = await fetch(GITHUB_API+'/repos/'+OWNER+'/'+REPO+'/contents/'+FILE_PATH, {
-                method: 'PUT', 
-                headers: { 'Authorization': 'token ' + TOKEN, 'Content-Type': 'application/json' }, 
-                body: JSON.stringify(body)
+                method: 'PUT', headers: { 'Authorization': 'token ' + TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify(body)
             });
-            
-            if (res.ok) { 
-                console.log('[v3.2.0] ☁️ 已同步到云端'); 
-                return true; 
-            }
-            console.log('[v3.2.0] 同步失败:', res.status);
+            if (res.ok) { console.log('[v3.1.0] ☁️ 已同步到云端'); return true; }
             return false;
-        } catch(e) { 
-            console.log('[v3.2.0] 同步失败:', e.message); 
-            return false; 
-        }
+        } catch(e) { console.log('[v3.1.0] 云端保存失败:', e.message); return false; }
     };
     
-    // 合并云端数据到本地
-    async function mergeCloudData() {
+    // 初始化：加载云端数据并合并
+    async function init() {
         const cloud = await loadFromCloud();
-        if (!cloud) return;
-        
-        const LS_KEY = 'health_tracker_v1';
-        const local = JSON.parse(localStorage.getItem(LS_KEY) || '{"profile":{},"days":{}}');
-        let changed = false;
-        
-        // 合并 days（云端优先）
-        if (cloud.days) {
-            for (let date in cloud.days) {
-                if (!local.days) local.days = {};
-                const cDay = cloud.days[date];
-                const lDay = local.days[date];
-                // 如果云端有数据且本地没有，或云端更新
-                if (!lDay || (cDay._ts && (!lDay._ts || cDay._ts > lDay._ts))) {
-                    local.days[date] = cDay;
-                    changed = true;
+        if (cloud && cloud.days && Object.keys(cloud.days).length > 0) {
+            const local = JSON.parse(localStorage.getItem('health_tracker_v1') || '{"profile":{},"days":{}}');
+            // 合并：以时间戳较新的为准
+            for (let d in cloud.days) {
+                const cDay = cloud.days[d], lDay = local.days[d];
+                if (!lDay || (cDay._ts && lDay._ts && cDay._ts > lDay._ts)) {
+                    local.days[d] = cDay;
                 }
             }
-        }
-        
-        // 合并 profile（云端优先）
-        if (cloud.profile && Object.keys(cloud.profile).length > 0) {
-            local.profile = cloud.profile;
-            changed = true;
-        }
-        
-        // 保存并刷新
-        if (changed) {
-            localStorage.setItem(LS_KEY, JSON.stringify(local));
-            console.log('[v3.2.0] ☁️ 云端数据已合并');
-            // 刷新全局 data 变量
-            if (typeof data !== 'undefined') {
-                data.profile = local.profile;
-                data.days = local.days;
-            }
+            if (cloud.profile && Object.keys(cloud.profile).length > 0) local.profile = cloud.profile;
+            localStorage.setItem('health_tracker_v1', JSON.stringify(local));
+            console.log('[v3.1.0] ☁️ 云端数据已加载');
             // 刷新 UI
-            if (typeof updateAll === 'function') {
-                setTimeout(updateAll, 50);
-            }
-        } else {
-            console.log('[v3.2.0] 本地数据已是最新');
+            if (typeof updateAll === 'function') setTimeout(updateAll, 100);
         }
     }
     
-    // 页面加载时合并云端数据
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', mergeCloudData);
-    } else {
-        mergeCloudData();
-    }
-    
-    // 提供手动同步按钮
-    window.syncFromCloud = mergeCloudData;
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
 })();
 </script>
 
