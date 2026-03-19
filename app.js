@@ -77,7 +77,7 @@ var _syncEnabled = false; // disabled during init, enabled after first sync
 var SYNC_CFG = {
     accessKey: 'SRV_TWf8pAm28iVVnYAjazSLqn4L8CkKyhZB',
     secretKey: 'Zj97qdzjCMXy8wnJ372n1z1aY7AkKsvM',
-    host: '',  // 本地模式，不依赖云端
+    host: 's3plus-bj02.vip.sankuai.com',
     bucket: 'openclaw-bucket',
     objectKey: 'health-dashboard/health-data.json'
 };
@@ -125,8 +125,7 @@ async function cloudPut(obj) {
 }
 
 // Download data from cloud (public read, no auth needed)
-async function cloudGet() { return null; // v36: 禁用云端
-    /*
+async function cloudGet() {
     try {
         var resp = await fetch(s3Url() + '?t=' + Date.now());
         if (!resp.ok) return null;
@@ -135,7 +134,7 @@ async function cloudGet() { return null; // v36: 禁用云端
         console.warn('[sync] GET failed:', e);
         return null;
     }
-} */
+}
 
 // Merge: 云端优先策略
 // 云端是权威数据源（可能被后端/agent更新），本地只在没有云端时才用
@@ -181,20 +180,35 @@ function setSyncStatus(status) {
 
 // Full sync: download → merge → save both
 async function cloudSync(forceCloud) {
-    // v36: 禁用云端同步，仅本地存储
     if (_syncing) return;
     _syncing = true;
-    setSyncStatus('ok');  // 直接显示成功
-    try {
-    // 本地数据已保存，刷新 UI 即可
-    loadProfile();
-    calcMetrics();
-    updateAll();
-    renderWater();
+    setSyncStatus('syncing');
     
-    if (forceCloud) {
-        alert('✅ 数据已刷新！');
-    }
+    try {
+        var cloud = await cloudGet();
+        var local = loadData();
+        
+        if (cloud) {
+            // forceCloud=true: 直接用云端数据，不merge（用于强制刷新）
+            var merged = forceCloud ? cloud : mergeData(local, cloud);
+            data = merged;
+            localStorage.setItem(LS_KEY, JSON.stringify(data));
+        }
+        
+        // Upload merged (or local if no cloud)
+        var ok = await cloudPut(data);
+        setSyncStatus(ok ? 'ok' : 'error');
+        _lastSyncTime = Date.now();
+        
+        // Refresh UI with synced data
+        loadProfile();
+        calcMetrics();
+        updateAll();
+        renderWater();
+
+        if (forceCloud) {
+            alert('✅ 已从云端强制刷新数据！');
+        }
     } catch(e) {
         console.warn('[sync] error:', e);
         setSyncStatus('error');
@@ -233,10 +247,6 @@ function scheduleSyncAfterSave() {
     if (_syncTimer) clearTimeout(_syncTimer);
     _syncTimer = setTimeout(function() {
         cloudSync();
-        // v31: 同时触发页面间同步
-        if (typeof broadcastDataChange === 'function') {
-            broadcastDataChange();
-        }
     }, 3000);
 }
 
@@ -245,31 +255,6 @@ function todayStr() {
     return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); 
 }
 function loadData() {
-    // 检查是否有导入的历史数据
-    if (typeof IMPORTED_HEALTH_DATA !== 'undefined' && IMPORTED_HEALTH_DATA) {
-        const localRaw = localStorage.getItem(LS_KEY);
-        var localData = localRaw ? JSON.parse(localRaw) : { profile: {}, days: {} };
-        
-        // 合并导入数据和本地数据
-        if (IMPORTED_HEALTH_DATA.profile) {
-            Object.assign(localData.profile, IMPORTED_HEALTH_DATA.profile);
-        }
-        if (IMPORTED_HEALTH_DATA.days) {
-            for (var date in IMPORTED_HEALTH_DATA.days) {
-                localData.days[date] = IMPORTED_HEALTH_DATA.days[date];
-            }
-        }
-        
-        // 保存合并后的数据到 localStorage
-        localStorage.setItem(LS_KEY, JSON.stringify(localData));
-        console.log('历史数据已导入: ' + Object.keys(IMPORTED_HEALTH_DATA.days || {}).length + '天');
-        
-        // 清除导入数据，避免重复导入
-        window.IMPORTED_HEALTH_DATA = null;
-        
-        return localData;
-    }
-    
     const raw = localStorage.getItem(LS_KEY);
     return raw ? JSON.parse(raw) : { profile: {}, days: {} };
 }
@@ -279,10 +264,6 @@ function saveData() {
     if (day) day._ts = Date.now();
     
     localStorage.setItem(LS_KEY, JSON.stringify(data));
-    // v35: 立即触发页面间同步
-    if (typeof broadcastDataChange === 'function') {
-        broadcastDataChange();
-    }
     scheduleSyncAfterSave();
 }
 function getDay(d) { if(!data.days[d]) data.days[d]={exercises:[],foods:[],weight:null}; return data.days[d]; }
@@ -1689,7 +1670,7 @@ function addHemaFood(index) {
 // ===== 盒马食物库 =====
 var _hemaDB = null;
 function loadHemaDB() {
-    var url = './hema-food-db.json?t=' + Date.now();
+    var url = 'https://s3plus-bj02.vip.sankuai.com/openclaw-bucket/health-dashboard/hema-food-db.json?t=' + Date.now();
     fetch(url).then(function(r){return r.json()}).then(function(db){
         _hemaDB = db;
         renderHemaDB();
@@ -2033,7 +2014,7 @@ function renderPk() {
 }
 
 // ===== Daily Tips =====
-var DAILY_TIPS_URL = '';  // 本地模式
+var DAILY_TIPS_URL = 'https://s3plus-bj02.vip.sankuai.com/openclaw-bucket/health-dashboard/daily-tips.json';
 var DAILY_TIPS_KEY = 'health_daily_tips_v1';
 
 function loadDailyTips() {
@@ -2664,4 +2645,3 @@ function renderWeightChart() {
         }
     }, 200);
 })();
-
