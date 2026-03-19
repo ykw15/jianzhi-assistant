@@ -265,9 +265,9 @@ function saveData() {
     
     localStorage.setItem(LS_KEY, JSON.stringify(data));
     
-    // v3.0.1: 广播数据更新给其他页面
-    if (typeof window.broadcastUpdate === 'function') {
-        window.broadcastUpdate();
+    // v3.1.0: 同步到云端
+    if (typeof window._saveToCloud === 'function') {
+        window._saveToCloud(data);
     }
     
     scheduleSyncAfterSave();
