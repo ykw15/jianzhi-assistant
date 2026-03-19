@@ -1694,43 +1694,39 @@ function renderHemaDB() {
     var countEl = document.getElementById('hema-db-count');
     if(!container) return;
     
-    // v3.3.1: 适配内嵌数据结构 {foods: [...]}
-    var items = (_hemaDB.foods || []).map(function(f) {
-        // 添加默认值
-        f.times_eaten = f.times_eaten || 0;
-        f.sample_amount = f.sample_amount || '100g';
-        f.needs_photo = f.needs_photo !== false;
-        return f;
-    });
+    // v3.3.4: 双列 feed 流
+    var items = (_hemaDB.foods || []).map(function(f) { f.times_eaten = f.times_eaten || 0; return f; });
     countEl.textContent = items.length;
+    
+    container.style.display = 'flex';
+    container.style.flexWrap = 'wrap';
+    container.style.gap = '8px';
     
     var html = '';
     for(var i = 0; i < items.length; i++) {
         var item = items[i];
         var p = item.per100g || {};
-        var igList = (item.ingredients || []).filter(function(x){return x.role==='主料'}).map(function(x){return x.name}).join('、');
-        if(igList.length > 20) igList = igList.substring(0, 20) + '…';
         
-        // 是否有官方数据(图片验证)
-        var verified = item.needs_photo === false ? '✅' : '⚠️';
+        var tags = [];
+        if(p.kcal <= 60) tags.push('🟢低卡');
+        else if(p.kcal <= 120) tags.push('🟡中卡');
+        else tags.push('🔴高卡');
+        if(p.protein >= 10) tags.push('💪高蛋白');
+        if(p.fiber >= 2) tags.push('🌾高纤');
         
-        // 减脂评分
-        var score = '';
-        if(p.kcal <= 60) score = '🟢极低卡';
-        else if(p.kcal <= 120) score = '🟢低卡';
-        else if(p.kcal <= 180) score = '🟡中卡';
-        else score = '🟠高卡';
-        
-        if(p.protein >= 10) score += ' 💪高蛋白';
-        if(p.fiber >= 2) score += ' 🌾高纤';
-        
-        html += '<div style=\"background:#fff;border-radius:8px;padding:8px 10px;border:1px solid #e0e0e0;width:calc(50% - 3px);box-sizing:border-box;font-size:11px;cursor:pointer\" ' +
-            'data-onclick=\"quickAddHemaFood(\'' + item.name.replace(/'/g,"\\'") + '\')\">' +
-            '<div style=\"font-weight:600;font-size:12px;margin-bottom:3px\">' + verified + ' ' + item.name + '</div>' +
-            '<div style=\"color:#666\">' + score + '</div>' +
-            '<div style=\"color:#888;margin-top:2px\">' + Math.round(p.kcal||0) + 'kcal/100g | P' + (p.protein||0) + ' F' + (p.fat||0) + ' C' + (p.carb||0) + '</div>' +
-            '<div style=\"color:#999;margin-top:1px;font-size:10px\">纤维' + (p.fiber||0) + 'g | ' + (igList || '配料待补') + '</div>' +
-            '<div style=\"color:#aaa;font-size:10px\">吃过' + item.times_eaten + '次 | 样本' + item.sample_amount + '</div>' +
+        html += '<div style="background:#fff;border-radius:12px;padding:12px;border:1px solid #e8e8e8;width:calc(50% - 4px);box-sizing:border-box;cursor:pointer;transition:all 0.2s" ' +
+            'onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.1)\'" ' +
+            'onmouseout="this.style.transform=\'none\';this.style.boxShadow=\'none\'" ' +
+            'data-onclick="quickAddHemaFood(\'' + item.name.replace(/'/, "\'") + '\')">' +
+            '<div style="font-weight:600;font-size:14px;margin-bottom:6px;color:#333">' + item.name + '</div>' +
+            '<div style="font-size:20px;font-weight:bold;color:#2e7d32;margin-bottom:4px">' + Math.round(p.kcal||0) + '<span style="font-size:12px;color:#666">kcal/100g</span></div>' +
+            '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">' + 
+            tags.map(function(t){return '<span style="font-size:10px;padding:2px 6px;background:#f0f0f0;border-radius:4px">'+t+'</span>';}).join('') + 
+            '</div>' +
+            '<div style="font-size:11px;color:#888;line-height:1.4">' +
+            '蛋白 ' + (p.protein||0).toFixed(1) + 'g · 碳水 ' + (p.carb||0).toFixed(1) + 'g · 脂肪 ' + (p.fat||0).toFixed(1) + 'g<br>' +
+            '钠 ' + Math.round(p.sodium||0) + 'mg · 纤维 ' + (p.fiber||0).toFixed(1) + 'g' +
+            '</div>' +
             '</div>';
     }
     container.innerHTML = html;
