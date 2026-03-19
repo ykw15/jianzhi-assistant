@@ -247,6 +247,10 @@ function scheduleSyncAfterSave() {
     if (_syncTimer) clearTimeout(_syncTimer);
     _syncTimer = setTimeout(function() {
         cloudSync();
+        // v31: 同时触发页面间同步
+        if (typeof broadcastDataChange === 'function') {
+            broadcastDataChange();
+        }
     }, 3000);
 }
 
