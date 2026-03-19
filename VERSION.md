@@ -1,5 +1,9 @@
 # 减脂助手看板版本记录
 
+## v32 (2026-03-19 16:20)
+- 修复：保存数据后触发页面间同步
+- app.js 中 scheduleSyncAfterSave 调用 broadcastDataChange
+
 ## v31 (2026-03-19 16:15)
 - 添加数据同步机制
 - 历史数据自动导入到 localStorage
