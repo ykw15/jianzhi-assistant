@@ -75,9 +75,9 @@ async function saveToCloud(data) {
             headers: { 'Authorization': 'token ' + TOKEN, 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
-        console.log('[v0.1.0] ☁️ 已同步');
+        console.log('[v0.1.0-1956] ☁️ 已同步');
     } catch(e) {
-        console.log('[v0.1.0] 同步失败:', e.message);
+        console.log('[v0.1.0-1956] 同步失败:', e.message);
     }
 }
 
@@ -91,7 +91,7 @@ async function loadFromCloud() {
         const content = decodeURIComponent(escape(atob(d.content.replace(/\s/g, ''))));
         return JSON.parse(content);
     } catch(e) {
-        console.log('[v0.1.0] 云端加载失败:', e.message);
+        console.log('[v0.1.0-1956] 云端加载失败:', e.message);
         return null;
     }
 }
@@ -286,7 +286,7 @@ async function init() {
         }
         if (cloud.profile) data.profile = cloud.profile;
         localStorage.setItem(LS_KEY, JSON.stringify(data));
-        console.log('[v0.1.0] ☁️ 云端数据已合并');
+        console.log('[v0.1.0-1956] ☁️ 云端数据已合并');
     }
     
     renderHome();
