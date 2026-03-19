@@ -1365,6 +1365,8 @@ function switchTab(name) {
     document.querySelectorAll('.tab').forEach(function(el) {
         if(el.getAttribute('data-onclick') === "switchTab('" + name + "')") el.classList.add('active');
     });
+    // v3.0.3: 切换 tab 时刷新所有数据
+    if(typeof updateAll === 'function') { try { updateAll(); } catch(e){} }
     if(name === 'log' || name === 'profile') { try { renderLog(); renderWeightChart(); } catch(e){} }
     if(name === 'diet') { try { renderMealPieCharts(); } catch(e){} }
 }
