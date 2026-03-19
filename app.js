@@ -180,34 +180,20 @@ function setSyncStatus(status) {
 
 // Full sync: download → merge → save both
 async function cloudSync(forceCloud) {
+    // v3.1.1: 禁用旧云同步，使用 GitHub 私有仓库
     if (_syncing) return;
     _syncing = true;
-    setSyncStatus('syncing');
+    setSyncStatus('ok');
+    _lastSyncTime = Date.now();
     
-    try {
-        var cloud = await cloudGet();
-        var local = loadData();
-        
-        if (cloud) {
-            // forceCloud=true: 直接用云端数据，不merge（用于强制刷新）
-            var merged = forceCloud ? cloud : mergeData(local, cloud);
-            data = merged;
-            localStorage.setItem(LS_KEY, JSON.stringify(data));
-        }
-        
-        // Upload merged (or local if no cloud)
-        var ok = await cloudPut(data);
-        setSyncStatus(ok ? 'ok' : 'error');
-        _lastSyncTime = Date.now();
-        
-        // Refresh UI with synced data
-        loadProfile();
-        calcMetrics();
-        updateAll();
-        renderWater();
-
-        if (forceCloud) {
-            alert('✅ 已从云端强制刷新数据！');
+    // 只刷新 UI，不连接旧云端
+    loadProfile();
+    calcMetrics();
+    updateAll();
+    renderWater();
+    
+    if (forceCloud) {
+        alert('✅ 数据已刷新！');
         }
     } catch(e) {
         console.warn('[sync] error:', e);
