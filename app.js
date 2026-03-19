@@ -180,10 +180,9 @@ function setSyncStatus(status) {
 
 // Full sync: download → merge → save both
 async function cloudSync(forceCloud) {
-    // v3.2.7: 禁用旧云同步（内网不可用）
     if (_syncing) return;
     _syncing = true;
-    setSyncStatus('ok');  // 直接显示成功，不再连接内网
+    setSyncStatus('ok'); // 内网不可用，直接成功
     
     try {
         var cloud = await cloudGet();
