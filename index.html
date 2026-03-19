@@ -850,9 +850,23 @@ function mergeImportedData() {
 // 页面间同步：监听其他页面的 localStorage 变化
 window.addEventListener('storage', function(e) {
     if (e.key === 'health_tracker_v1' && e.newValue) {
-        console.log('[v31] 检测到其他页面数据变化，自动刷新');
-        // 触发自定义事件，让页面刷新数据
-        window.dispatchEvent(new CustomEvent('dataSync', { detail: JSON.parse(e.newValue) }));
+        console.log('[v33] 检测到其他页面数据变化，3秒后自动刷新');
+        // 延迟一下让数据写完
+        setTimeout(function() {
+            // 重新加载数据
+            if (typeof loadData === 'function') {
+                data = JSON.parse(localStorage.getItem('health_tracker_v1') || '{"profile":{},"days":{}}');
+                if (typeof updateAll === 'function') {
+                    updateAll();
+                    console.log('[v33] 页面已自动刷新');
+                } else {
+                    // 如果 updateAll 不可用，刷新整个页面
+                    location.reload();
+                }
+            } else {
+                location.reload();
+            }
+        }, 500);
     }
 });
 
