@@ -77,7 +77,7 @@ var _syncEnabled = false; // disabled during init, enabled after first sync
 var SYNC_CFG = {
     accessKey: 'SRV_TWf8pAm28iVVnYAjazSLqn4L8CkKyhZB',
     secretKey: 'Zj97qdzjCMXy8wnJ372n1z1aY7AkKsvM',
-    host: 's3plus-bj02.vip.sankuai.com',
+    host: '',  // 本地模式，不依赖云端
     bucket: 'openclaw-bucket',
     objectKey: 'health-dashboard/health-data.json'
 };
@@ -255,6 +255,31 @@ function todayStr() {
     return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); 
 }
 function loadData() {
+    // 检查是否有导入的历史数据
+    if (typeof IMPORTED_HEALTH_DATA !== 'undefined' && IMPORTED_HEALTH_DATA) {
+        const localRaw = localStorage.getItem(LS_KEY);
+        var localData = localRaw ? JSON.parse(localRaw) : { profile: {}, days: {} };
+        
+        // 合并导入数据和本地数据
+        if (IMPORTED_HEALTH_DATA.profile) {
+            Object.assign(localData.profile, IMPORTED_HEALTH_DATA.profile);
+        }
+        if (IMPORTED_HEALTH_DATA.days) {
+            for (var date in IMPORTED_HEALTH_DATA.days) {
+                localData.days[date] = IMPORTED_HEALTH_DATA.days[date];
+            }
+        }
+        
+        // 保存合并后的数据到 localStorage
+        localStorage.setItem(LS_KEY, JSON.stringify(localData));
+        console.log('历史数据已导入: ' + Object.keys(IMPORTED_HEALTH_DATA.days || {}).length + '天');
+        
+        // 清除导入数据，避免重复导入
+        window.IMPORTED_HEALTH_DATA = null;
+        
+        return localData;
+    }
+    
     const raw = localStorage.getItem(LS_KEY);
     return raw ? JSON.parse(raw) : { profile: {}, days: {} };
 }
@@ -1670,7 +1695,7 @@ function addHemaFood(index) {
 // ===== 盒马食物库 =====
 var _hemaDB = null;
 function loadHemaDB() {
-    var url = 'https://s3plus-bj02.vip.sankuai.com/openclaw-bucket/health-dashboard/hema-food-db.json?t=' + Date.now();
+    var url = './hema-food-db.json?t=' + Date.now();
     fetch(url).then(function(r){return r.json()}).then(function(db){
         _hemaDB = db;
         renderHemaDB();
@@ -2014,7 +2039,7 @@ function renderPk() {
 }
 
 // ===== Daily Tips =====
-var DAILY_TIPS_URL = 'https://s3plus-bj02.vip.sankuai.com/openclaw-bucket/health-dashboard/daily-tips.json';
+var DAILY_TIPS_URL = '';  // 本地模式
 var DAILY_TIPS_KEY = 'health_daily_tips_v1';
 
 function loadDailyTips() {
