@@ -264,6 +264,12 @@ function saveData() {
     if (day) day._ts = Date.now();
     
     localStorage.setItem(LS_KEY, JSON.stringify(data));
+    
+    // v3.0.1: 广播数据更新给其他页面
+    if (typeof window.broadcastUpdate === 'function') {
+        window.broadcastUpdate();
+    }
+    
     scheduleSyncAfterSave();
 }
 function getDay(d) { if(!data.days[d]) data.days[d]={exercises:[],foods:[],weight:null}; return data.days[d]; }
