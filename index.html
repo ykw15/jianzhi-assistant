@@ -133,7 +133,7 @@
     </style>
 
 <script>
-// v3.3.6: GitHub 私有仓库云端同步（改进版）
+// v3.3.7: GitHub 私有仓库云端同步（改进版）
 (function() {
     const GITHUB_API = 'https://api.github.com';
     const OWNER = 'ykw15';
@@ -158,7 +158,7 @@
             const bytes = atob(base64);
             const decoded = decodeURIComponent(escape(bytes));
             return JSON.parse(decoded);
-        } catch(e) { console.log('[v3.3.6] 加载失败:', e.message); return null; }
+        } catch(e) { console.log('[v3.3.7] 加载失败:', e.message); return null; }
     }
     
     // 保存到云端
@@ -177,9 +177,9 @@
             const res = await fetch(GITHUB_API+'/repos/'+OWNER+'/'+REPO+'/contents/'+FILE_PATH, {
                 method: 'PUT', headers: { 'Authorization': 'token ' + TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify(body)
             });
-            if (res.ok) { console.log('[v3.3.6] ☁️ 已同步到云端'); return true; }
+            if (res.ok) { console.log('[v3.3.7] ☁️ 已同步到云端'); return true; }
             return false;
-        } catch(e) { console.log('[v3.3.6] 同步失败:', e.message); return false; }
+        } catch(e) { console.log('[v3.3.7] 同步失败:', e.message); return false; }
     };
     
     // 初始化：加载云端数据并合并
@@ -204,7 +204,7 @@
             }
             if (cloud.profile && Object.keys(cloud.profile).length > 0) local.profile = cloud.profile;
             localStorage.setItem('health_tracker_v1', JSON.stringify(local));
-            console.log('[v3.3.6] ☁️ 云端数据已合并');
+            console.log('[v3.3.7] ☁️ 云端数据已合并');
             // 刷新 UI
             if (typeof updateAll === 'function') setTimeout(updateAll, 100);
         }
@@ -886,6 +886,6 @@
 </div>
 
 <script src="./chart.js?v=1773915976"></script>
-<script src="./app.js?v=335"></script>
+<script src="./app.js?v=337"></script>
 </body>
 </html>
