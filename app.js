@@ -264,9 +264,15 @@ function saveData() {
     if (day) day._ts = Date.now();
     
     localStorage.setItem(LS_KEY, JSON.stringify(data));
+    
+    // v3.3.7: 直接调用云端保存
+    if (typeof window._saveToCloud === 'function') {
+        window._saveToCloud(data);
+    }
+    
     scheduleSyncAfterSave();
 }
-function getDay(d) { if(!data.days[d]) data.days[d]={exercises:[],foods:[],weight:null}; return data.days[d]; }
+function getDay(d) { if(!data.days[d]) data.days[d]={exercises:[],foods:[],water:0,weight:null}; return data.days[d]; }
 
 // 去除食物来源emoji前缀
 function stripSrc(name) { return (name||'').replace(/^🛒\s*/, '').replace(/^🐘\s*/, '').replace(/^🛵\s*/, ''); }
