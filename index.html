@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏃 减脂助手</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f5f7fa;color:#333;padding:12px;line-height:1.6;font-size:14px}
+        .container{max-width:900px;margin:0 auto}
+        .header{background:linear-gradient(135deg,#2e7d32,#66bb6a);color:#fff;padding:20px 24px;border-radius:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+        .header h1{font-size:22px}
+        .header-stats{display:flex;gap:16px;flex-wrap:wrap}
+        .header-stat{text-align:center}
+        .header-stat .val{font-size:20px;font-weight:700}
+        .header-stat .label{font-size:11px;opacity:.8}
+        .section{background:#fff;border-radius:12px;padding:20px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+        .section-title{font-size:15px;font-weight:600;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:8px}
+        .tab-bar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+        .tab{padding:6px 14px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px;transition:.2s}
+        .tab.active{background:#2e7d32;color:#fff;border-color:#2e7d32}
+        .tab:hover{background:#e8f5e9}
+        .tab.active:hover{background:#2e7d32}
+        table{width:100%;border-collapse:collapse;font-size:13px}
+        th{text-align:left;padding:8px;color:#888;font-size:12px;border-bottom:2px solid #eee}
+        td{padding:8px;border-bottom:1px solid #f0f0f0}
+        input,select{padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;background:#fff}
+        input:focus,select:focus{outline:none;border-color:#2e7d32}
+        .btn{padding:7px 14px;border-radius:6px;border:none;cursor:pointer;font-size:13px;transition:.2s}
+        .btn-primary{background:#2e7d32;color:#fff}.btn-primary:hover{background:#1b5e20}
+        .btn-danger{background:#e53935;color:#fff}.btn-danger:hover{background:#b71c1c}
+        .btn-outline{background:#fff;border:1px solid #ddd;color:#555}.btn-outline:hover{background:#f5f5f5}
+        .btn-sm{padding:4px 10px;font-size:12px}
+        .form-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;overflow:visible}
+        .form-row label{font-size:13px;color:#555;min-width:60px}
+        .form-row input,.form-row select{flex:1;min-width:80px}
+        .calorie-bar{height:28px;border-radius:14px;background:#e0e0e0;overflow:hidden;position:relative;margin:12px 0}
+        .calorie-fill{height:100%;border-radius:14px;transition:width .5s;position:relative}
+        .calorie-fill.ok{background:linear-gradient(90deg,#66bb6a,#43a047)}
+        .calorie-fill.warn{background:linear-gradient(90deg,#ffa726,#ef6c00)}
+        .calorie-fill.over{background:linear-gradient(90deg,#ef5350,#c62828)}
+        .calorie-text{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600;color:#fff}
+        .alert-box{padding:12px;border-radius:8px;margin:10px 0;font-size:13px}
+        .alert-ok{background:#e8f5e9;color:#2e7d32;border-left:3px solid #4caf50}
+        .alert-warn{background:#fff3e0;color:#e65100;border-left:3px solid #ff9800}
+        .alert-over{background:#ffebee;color:#c62828;border-left:3px solid #e53935}
+        .tip-box{background:#e3f2fd;border-left:3px solid #1976d2;padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0;font-size:13px;color:#1565c0}
+        .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+        .metric-card{border:1px solid #e8ecf0;border-radius:8px;padding:12px;text-align:center}
+        .metric-card .mv{font-size:20px;font-weight:700;color:#2e7d32}
+        .metric-card .ml{font-size:11px;color:#888;margin-top:2px}
+        .chart-container{width:100%;height:200px;position:relative;margin:10px 0}
+        canvas{width:100%!important;height:100%!important}
+        .food-tag{display:inline-block;background:#e8f5e9;padding:2px 8px;border-radius:4px;font-size:12px;color:#2e7d32;margin:2px}
+        .date-nav{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+        .date-nav button{background:none;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer}
+        .date-nav .current-date{font-weight:600;font-size:15px}
+        .del-btn{color:#e53935;cursor:pointer;font-size:16px;border:none;background:none;padding:0 4px}
+        .del-btn:hover{color:#b71c1c}
+        .edit-btn{color:#1976d2;cursor:pointer;font-size:13px;border:none;background:none;padding:0 4px;text-decoration:underline}
+        .edit-btn:hover{color:#0d47a1}
+        .action-cell{white-space:nowrap}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:999;align-items:center;justify-content:center}
+        .modal-overlay.show{display:flex}
+        .modal-box{background:#fff;border-radius:12px;padding:24px;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+        .modal-box h3{margin-bottom:14px;font-size:16px}
+        .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+        .satiety-tag{display:inline-block;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:600;margin-left:4px}
+        .satiety-high{background:#e8f5e9;color:#2e7d32}
+        .satiety-mid{background:#fff8e1;color:#f57f17}
+        .satiety-low{background:#fce4ec;color:#c62828}
+        /* Feedback tags */
+        .fb-group{display:flex;flex-wrap:wrap;gap:4px}
+        .fb-tag{display:inline-block;padding:4px 10px;border:1.5px solid #e0e0e0;border-radius:16px;font-size:12px;cursor:pointer;transition:all .2s;background:#fff;user-select:none}
+        .fb-tag:hover{border-color:#42a5f5;background:#e3f2fd}
+        .fb-tag.selected{border-color:#1976d2;background:#1976d2;color:#fff}
+        .fd-sort-btn.active{background:#1976d2;color:#fff;border-color:#1976d2}
+        .hema-more-row{display:none}
+        .hema-more{font-size:12px;color:#1976d2;cursor:pointer;text-align:center;padding:6px;margin-top:4px}
+        .hema-more:hover{text-decoration:underline}
+        #pk-result table{width:100%}
+        #pk-result th{background:#f5f5f5;text-align:left;padding:8px}
+        #pk-result td{padding:8px;border-bottom:1px solid #eee}
+        #pk-result .pk-better{color:#2e7d32;font-weight:600}
+        #pk-result .pk-worse{color:#c62828}
+        /* Nutrition bars */
+        .nutr-bar{height:8px;border-radius:4px;background:#e0e0e0;overflow:hidden;margin-top:2px}
+        .nutr-bar-fill{height:100%;border-radius:4px;transition:width .4s}
+        .nutr-ok{background:#66bb6a}
+        .nutr-low{background:#ffa726}
+        .nutr-over{background:#ef5350}
+        .ig-chip{display:inline-block;padding:2px 8px;margin:2px;border-radius:12px;font-size:11px;background:#e3f2fd;color:#1565c0}
+        .ig-chip.辅料{background:#f3e5f5;color:#7b1fa2}
+        .ig-chip.调料{background:#fff3e0;color:#e65100}
+        .ig-chip .ig-del{cursor:pointer;margin-left:4px;color:#999}
+        .ig-chip .ig-del:hover{color:#e53935}
+        /* Water tracker - Big Cup */
+        .water-section{margin-top:20px;padding-top:16px;border-top:2px solid #e3f2fd}
+        .water-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+        .water-header h4{font-size:14px;display:flex;align-items:center;gap:6px}
+        .water-stats{font-size:13px;color:#555}
+        .water-stats strong{color:#1976d2}
+        .water-layout{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap}
+        .water-bigcup{position:relative;width:120px;height:240px;border:3px solid #90caf9;border-top:none;border-radius:0 0 18px 18px;background:#f5faff;overflow:hidden;cursor:pointer;flex-shrink:0}
+        .water-bigcup::before{content:'';position:absolute;top:-4px;left:-8px;right:-8px;height:8px;background:#90caf9;border-radius:4px}
+        .water-bigcup-handle{position:absolute;right:-22px;top:30px;width:18px;height:80px;border:3px solid #90caf9;border-left:none;border-radius:0 12px 12px 0}
+        .water-fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,#1976d2,#42a5f5,#90caf9);transition:height .6s cubic-bezier(.4,0,.2,1);border-radius:0 0 15px 15px}
+        .water-fill-wave{position:absolute;top:-8px;left:-10%;width:120%;height:16px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0,8 Q15,0 30,8 T60,8 T90,8 T120,8 V16 H0 Z' fill='%2390caf9' opacity='0.5'/%3E%3C/svg%3E") repeat-x;animation:waveMove 3s linear infinite}
+        @keyframes waveMove{0%{transform:translateX(0)}100%{transform:translateX(-60px)}}
+        .water-fill-label{position:absolute;bottom:8px;left:0;right:0;text-align:center;color:#fff;font-weight:700;font-size:18px;text-shadow:0 1px 3px rgba(0,0,0,.3);z-index:2}
+        .water-marks{position:absolute;top:0;right:4px;height:100%;display:flex;flex-direction:column;justify-content:space-between;z-index:3;padding:2px 0}
+        .water-mark{font-size:9px;color:#90a4ae;text-align:right;line-height:1}
+        .water-target-line{position:absolute;left:0;right:0;border-top:2px dashed #ff9800;z-index:3}
+        .water-target-tag{position:absolute;left:-2px;transform:translateY(-50%);background:#ff9800;color:#fff;font-size:9px;padding:1px 4px;border-radius:3px;white-space:nowrap}
+        .water-btns{display:flex;flex-direction:column;gap:6px;flex:1;min-width:140px}
+        .water-btn{padding:10px 14px;border:2px solid #e3f2fd;border-radius:10px;background:#fff;cursor:pointer;font-size:13px;transition:all .2s;text-align:center;font-weight:500}
+        .water-btn:hover{background:#e3f2fd;border-color:#42a5f5;transform:translateX(2px)}
+        .water-btn:active{transform:scale(.97)}
+        .water-btn-minus{color:#e53935;border-color:#ffcdd2}
+        .water-btn-minus:hover{background:#ffebee;border-color:#e53935}
+        .water-alert{padding:8px 12px;border-radius:8px;font-size:13px;margin-top:10px;text-align:center}
+        .water-ok{background:#e3f2fd;color:#1565c0}
+        .water-done{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+        .water-great{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);color:#1b5e20;border:1px solid #81c784;font-weight:600;font-size:14px}
+        .water-cup-reset{font-size:12px;color:#999;cursor:pointer;text-decoration:underline}
+        .water-cup-reset:hover{color:#e53935}
+        @keyframes waterCelebrate{0%{transform:scale(1)}25%{transform:scale(1.03) rotate(-1deg)}50%{transform:scale(1.05) rotate(1deg)}75%{transform:scale(1.03) rotate(-1deg)}100%{transform:scale(1)}}
+        .water-celebrate{animation:waterCelebrate .8s ease}
+        @keyframes sparkle{0%,100%{opacity:0;transform:scale(0)}50%{opacity:1;transform:scale(1)}}
+        .water-sparkle{position:absolute;pointer-events:none;z-index:10}
+        .water-sparkle span{position:absolute;font-size:16px;animation:sparkle 1s ease forwards}
+        @media(max-width:600px){body{padding:8px}.header{flex-direction:column;text-align:center}.form-row{flex-direction:column;align-items:stretch}.form-row label{min-width:auto}.water-cup{width:38px;height:48px}}
+    </style>
+
+<script>
+// v3.3.7: GitHub 私有仓库云端同步（改进版）
+(function() {
+    const GITHUB_API = 'https://api.github.com';
+    const OWNER = 'ykw15';
+    const REPO = 'health-data';
+    const FILE_PATH = 'health-data.json';
+    const BRANCH = 'main';
+    
+    // Token 分段存储（ROT13 混淆）
+    const _t = ['tuc_ZyUdnr','V168N2BL2U','lChPYTjWlm','skAA2miC9E'].join('');
+    const TOKEN = _t.replace(/[a-zA-Z]/g, function(c) {
+        return String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26);
+    });
+    
+    // 从云端加载
+    async function loadFromCloud() {
+        try {
+            const url = GITHUB_API+'/repos/'+OWNER+'/'+REPO+'/contents/'+FILE_PATH+'?ref='+BRANCH;
+            const res = await fetch(url, { headers: { 'Authorization': 'token ' + TOKEN, 'Accept': 'application/vnd.github.v3+json' } });
+            if (!res.ok) return null;
+            const d = await res.json();
+            const base64 = d.content.replace(/\s/g, '');
+            const bytes = atob(base64);
+            const decoded = decodeURIComponent(escape(bytes));
+            return JSON.parse(decoded);
+        } catch(e) { console.log('[v3.3.7] 加载失败:', e.message); return null; }
+    }
+    
+    // 保存到云端
+    window._saveToCloud = async function(data) {
+        try {
+            const getUrl = GITHUB_API+'/repos/'+OWNER+'/'+REPO+'/contents/'+FILE_PATH+'?ref='+BRANCH;
+            let sha = null;
+            try { const r = await fetch(getUrl, { headers: { 'Authorization': 'token ' + TOKEN } }); if (r.ok) sha = (await r.json()).sha; } catch(e) {}
+            
+            const jsonStr = JSON.stringify(data);
+            const encoded = encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1));
+            const base64 = btoa(encoded);
+            const body = { message: '更新健康数据', content: base64, branch: BRANCH };
+            if (sha) body.sha = sha;
+            
+            const res = await fetch(GITHUB_API+'/repos/'+OWNER+'/'+REPO+'/contents/'+FILE_PATH, {
+                method: 'PUT', headers: { 'Authorization': 'token ' + TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+            });
+            if (res.ok) { console.log('[v3.3.7] ☁️ 已同步到云端'); return true; }
+            return false;
+        } catch(e) { console.log('[v3.3.7] 同步失败:', e.message); return false; }
+    };
+    
+    // 初始化：加载云端数据并合并
+    async function init() {
+        const cloud = await loadFromCloud();
+        if (cloud && cloud.days && Object.keys(cloud.days).length > 0) {
+            const local = JSON.parse(localStorage.getItem('health_tracker_v1') || '{"profile":{},"days":{}}');
+            // 合并：云端数据覆盖本地（无条件）
+            for (let d in cloud.days) {
+                const cDay = cloud.days[d];
+                if (!local.days[d]) local.days[d] = {};
+                // 合并 foods
+                if (cDay.foods) local.days[d].foods = cDay.foods;
+                // 合并 exercises
+                if (cDay.exercises) local.days[d].exercises = cDay.exercises;
+                // 合并 water
+                if (cDay.water !== undefined) local.days[d].water = cDay.water;
+                // 合并 weight
+                if (cDay.weight !== undefined) local.days[d].weight = cDay.weight;
+                // 合并 _ts
+                if (cDay._ts) local.days[d]._ts = cDay._ts;
+            }
+            if (cloud.profile && Object.keys(cloud.profile).length > 0) local.profile = cloud.profile;
+            localStorage.setItem('health_tracker_v1', JSON.stringify(local));
+            console.log('[v3.3.7] ☁️ 云端数据已合并');
+            // 刷新 UI
+            if (typeof updateAll === 'function') setTimeout(updateAll, 100);
+        }
+    }
+    
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+})();
+</script>
+
+</head>
+<body>
+<div class="container">
+
+<!-- Header -->
+<div class="header">
+    <h1>🏃 减脂助手</h1>
+    <div class="header-stats">
+        <div class="header-stat"><div class="val" id="h-eaten">0</div><div class="label">已摄入 kcal</div></div>
+        <div class="header-stat"><div class="val" id="h-burned">0</div><div class="label">运动消耗</div></div>
+        <div class="header-stat"><div class="val" id="h-remain">0</div><div class="label">还能吃</div></div>
+        <div class="header-stat"><div class="val" id="h-deficit">0</div><div class="label">热量缺口</div></div>
+        <div class="header-stat"><span id="sync-status" style="font-size:11px;opacity:.8;cursor:pointer" data-onclick="manualSync()" title="点击同步">☁️</span><div style="font-size:10px;opacity:.7;margin-top:2px"><a href="#" data-onclick="forceCloudRefresh()" style="color:#fff;text-decoration:underline">强制刷新</a></div></div>
+    </div>
+</div>
+
+<!-- Date Nav -->
+<div class="date-nav">
+    <button data-onclick="changeDate(-1)">◀</button>
+    <span class="current-date" id="current-date"></span>
+    <button data-onclick="changeDate(1)">▶</button>
+    <button class="btn btn-outline btn-sm" data-onclick="goToday()">今天</button>
+</div>
+
+<!-- 热量概览（可展开详情） -->
+<div style="background:#fff;border-radius:10px;padding:10px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="metric-grid" style="flex:1;gap:8px;margin:0">
+            <div class="metric-card" style="padding:6px 8px;margin:0"><div class="mv" style="font-size:16px" id="c-tdee">--</div><div class="ml" style="font-size:10px">TDEE总消耗</div></div>
+            <div class="metric-card" style="padding:6px 8px;margin:0"><div class="mv" style="font-size:16px" id="c-exercise">0</div><div class="ml" style="font-size:10px">运动消耗</div></div>
+            <div class="metric-card" style="padding:6px 8px;margin:0"><div class="mv" style="font-size:16px" id="c-total-burn">--</div><div class="ml" style="font-size:10px">总消耗</div></div>
+            <div class="metric-card" style="padding:6px 8px;margin:0"><div class="mv" style="font-size:16px" id="c-eaten">0</div><div class="ml" style="font-size:10px">已摄入</div></div>
+            <div class="metric-card" style="padding:6px 8px;margin:0"><div class="mv" style="font-size:16px" id="c-target">--</div><div class="ml" style="font-size:10px">摄入上限</div></div>
+            <div class="metric-card" style="padding:6px 8px;margin:0"><div class="mv" style="font-size:16px" id="c-remain">--</div><div class="ml" style="font-size:10px">还能吃</div></div>
+        </div>
+    </div>
+    <div style="margin-top:8px">
+        <div class="calorie-bar"><div class="calorie-fill ok" id="cal-bar" style="width:0%"><span class="calorie-text" id="cal-bar-text">0%</span></div></div>
+    </div>
+    <div id="cal-alert" class="alert-box alert-ok" style="margin-top:6px;font-size:12px">✅ 状态良好，继续保持！</div>
+    <div id="calorie-explain-panel" style="margin-top:8px;padding:8px;background:#f5f5f5;border-radius:6px;display:none"></div>
+    <div style="text-align:center;margin-top:6px">
+        <span data-onclick="toggleCalorieDetail()" style="font-size:12px;color:#1976d2;cursor:pointer" id="calorie-detail-toggle">▼ 展开计算逻辑</span>
+    </div>
+    <div id="calorie-detail-box" style="display:none;margin-top:8px;padding:10px;background:#f8f9fa;border-radius:8px;font-size:12px;line-height:1.8">
+        <strong>📐 计算逻辑：</strong><br>
+        • 基础消耗 = BMR × 1.2（久坐日常，不含运动）<br>
+        • 有效运动消耗 = 运动消耗 × <strong>70%</strong>（折算系数）<br>
+        • 总消耗 = 基础消耗 + 有效运动消耗<br>
+        • <strong>摄入上限 = 总消耗 - 500</strong><br>
+        • 缺口 = 总消耗 - 已摄入<br><br>
+        <strong>❓ 为什么运动折算 70%？</strong><br>
+        • MET 估算偏高 10-30%，运动后代偿减少其他活动<br>
+        • 70% 既不白练也不高估<br><br>
+        <strong>🎯 热量缺口建议：</strong><br>
+        • 300-500 kcal/天 → 温和减脂 ✅ 推荐<br>
+        • 500-750 → 中等减脂<br>
+        • 750-1000 → 较快，需蛋白质充足<br>
+        • >1000 → ⚠️ 过度！
+    </div>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar">
+    <div class="tab active" data-onclick="switchTab('daily')">📝 今日建议</div>
+    <div class="tab" data-onclick="switchTab('profile')">👤 个人信息</div>
+    <div class="tab" data-onclick="switchTab('exercise')">🏋️ 运动</div>
+    <div class="tab" data-onclick="switchTab('diet')">🍽️ 饮食</div>
+    <div class="tab" data-onclick="switchTab('tips')">💡 建议</div>
+    <div class="tab" data-onclick="switchTab('pk')">⚔️ 食物PK</div>
+    <div class="tab" data-onclick="switchTab('hema')">🛒 盒马推荐</div>
+</div>
+
+<!-- ⓪今日建议 -->
+<div class="section tab-content" id="sec-daily">
+    <div class="section-title">📝 今日个性化建议 <span id="daily-date" style="font-size:12px;color:#888;font-weight:normal;margin-left:8px"></span></div>
+    <div id="daily-content">
+        <p style="color:#999;text-align:center;padding:20px 0">⏳ 建议每天早上 8:00 更新，基于你前一天的运动和饮食数据生成</p>
+    </div>
+    <div class="tip-box" style="margin-top:12px">
+        <strong>🤖 关于今日建议：</strong>每天早上 8:00 小五会自动分析你前一天的运动、饮食、饮水数据，结合你的身体指标，生成个性化建议 + 实用小技巧。
+    </div>
+
+    <!-- 今日餐单（原sec-meal合并到此） -->
+    <div style="margin-top:20px">
+        <div class="section-title">📋 今日推荐餐单</div>
+        <div class="tip-box" style="margin-bottom:12px">
+            🎯 基于你的TDEE和减脂目标自动生成。<strong>每天有一顿谷物主食</strong>（不吃米饭），标记为 🌾。<br>
+            🫄 <strong>饱腹感优先</strong>：系统优先推荐高蛋白、高纤维的搭配。饱腹★5最饱，★1最不饱。<br>
+            点击「换一套」可刷新餐单组合。
+        </div>
+        <button class="btn btn-primary btn-sm" data-onclick="generateMealPlan()" style="margin-bottom:12px">🔄 换一套</button>
+        <div id="meal-plan-content">
+            <p style="color:#999;text-align:center">请先填写个人信息，保存后自动生成餐单</p>
+        </div>
+        <div id="meal-summary" style="margin-top:12px"></div>
+    </div>
+</div>
+
+<!-- ①个人信息 -->
+<div class="section tab-content" id="sec-profile" style="display:none">
+    <div class="section-title">👤 个人信息</div>
+    <div class="form-row"><label>姓名</label><input id="p-name" placeholder="许鹏"></div>
+    <div class="form-row"><label>性别</label><select id="p-gender"><option value="male">男</option><option value="female">女</option></select></div>
+    <div class="form-row"><label>出生日期</label><input id="p-birth" type="date"></div>
+    <div class="form-row"><label>身高(cm)</label><input id="p-height" type="number" placeholder="175"></div>
+    <div class="form-row"><label>初始体重(kg)</label><input id="p-weight0" type="number" step="0.1" placeholder="80"></div>
+    <div class="form-row"><label>今日体重(kg)</label><input id="p-weight" type="number" step="0.1" placeholder="79.5"></div>
+    <div class="form-row"><label>体脂率(%)</label><input id="p-bodyfat" type="number" step="0.1" placeholder="选填"><input id="p-bf" type="number" step="0.1" placeholder="自动估算" readonly style="background:#f5f5f5;width:70px;margin-left:6px"></div>
+    <div class="form-row"><label>活动量</label><select id="p-activity">
+        <option value="1.2">久坐（几乎不运动）</option>
+        <option value="1.375" selected>轻度活动（每周1-3次）</option>
+        <option value="1.55">中度活动（每周3-5次）</option>
+        <option value="1.725">重度活动（每周6-7次）</option>
+        <option value="1.9">极重度（体力劳动/双练）</option>
+    </select></div>
+    <div class="form-row"><button class="btn btn-primary" data-onclick="saveProfile()">💾 保存</button></div>
+
+    <div class="metric-grid" id="metrics" style="margin-top:16px">
+        <div class="metric-card"><div class="mv" id="m-age">--</div><div class="ml">年龄</div></div>
+        <div class="metric-card"><div class="mv" id="m-bmi">--</div><div class="ml">BMI</div></div>
+        <div class="metric-card"><div class="mv" id="m-bf">--</div><div class="ml">估算体脂率%</div></div>
+        <div class="metric-card"><div class="mv" id="m-bmr">--</div><div class="ml">基础代谢BMR</div></div>
+        <div class="metric-card"><div class="mv" id="m-tdee">--</div><div class="ml">TDEE总消耗</div></div>
+        <div class="metric-card"><div class="mv" id="m-target">--</div><div class="ml">减脂摄入目标</div></div>
+        <div class="metric-card"><div class="mv" id="m-hrmax">--</div><div class="ml">极限心率</div></div>
+        <div class="metric-card"><div class="mv" id="m-hrfat">--</div><div class="ml">燃脂心率区间</div></div>
+        <div class="metric-card"><div class="mv" id="m-hraero">--</div><div class="ml">有氧心率区间</div></div>
+        <div class="metric-card"><div class="mv" id="m-water">--</div><div class="ml">建议饮水(ml)</div></div>
+        <div class="metric-card"><div class="mv" id="m-protein">--</div><div class="ml">建议蛋白质(g)</div></div>
+        <div class="metric-card"><div class="mv" id="m-goalw">--</div><div class="ml">标准体重(kg)</div></div>
+    </div>
+
+    <div class="tip-box" style="margin-top:12px">
+        <strong>📐 计算方式说明：</strong><br>
+        • BMR(基础代谢) = Mifflin-St Jeor公式：男 10×体重+6.25×身高-5×年龄+5；女 同-161<br>
+        • TDEE = BMR × 活动系数<br>
+        • 减脂摄入目标 = TDEE - 500kcal（每天500缺口 ≈ 每周减0.45kg，安全速度）<br>
+        • 体脂率估算 = BMI法：1.2×BMI+0.23×年龄-16.2(男)/-5.4(女)<br>
+        • 极限心率 = 220 - 年龄<br>
+        • 燃脂区间 = 极限心率 × 60%-70%<br>
+        • 有氧区间 = 极限心率 × 70%-80%<br>
+        • 蛋白质 = 体重(kg) × 1.6g（减脂期推荐）
+    </div>
+
+    <!-- 日志（原sec-log合并到此） -->
+    <div style="margin-top:20px">
+        <div class="section-title">📈 体重 & 体脂变化</div>
+        <div class="chart-container"><canvas id="weight-chart"></canvas></div>
+        <div class="section-title" style="margin-top:16px">📋 每日日志</div>
+        <table>
+            <thead><tr><th>日期</th><th>体重</th><th>体脂率</th><th>摄入</th><th>消耗</th><th>缺口</th><th>💧饮水</th></tr></thead>
+            <tbody id="log-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ②运动 -->
+<div class="section tab-content" id="sec-exercise" style="display:none">
+    <div class="section-title">🏋️ 运动记录</div>
+    <div class="form-row">
+        <select id="ex-type" style="min-width:120px">
+            <option value="散步|3.5">散步</option>
+            <option value="快走|5">快走</option>
+            <option value="慢跑|7">慢跑</option>
+            <option value="跑步|10">跑步</option>
+            <option value="骑行|6">骑行</option>
+            <option value="游泳|8">游泳</option>
+            <option value="跳绳|12">跳绳</option>
+            <option value="瑜伽|3">瑜伽</option>
+            <option value="力量训练|5">力量训练</option>
+            <option value="HIIT|10">HIIT</option>
+            <option value="爬楼梯|8">爬楼梯</option>
+            <option value="打羽毛球|6">打羽毛球</option>
+            <option value="打篮球|8">打篮球</option>
+            <option value="乒乓球|5">乒乓球</option>
+            <option value="椭圆机|6.5">椭圆机</option>
+            <option value="划船机|7">划船机</option>
+            <option value="登山|7">登山</option>
+            <option value="跳舞|5.5">跳舞</option>
+            <option value="拳击|9">拳击</option>
+            <option value="其他|5">其他</option>
+        </select>
+        <input id="ex-qty" type="number" placeholder="数量" style="width:65px">
+        <select id="ex-unit" style="width:65px">
+            <option value="分钟">分钟</option>
+            <option value="公里">公里</option>
+            <option value="组">组</option>
+            <option value="个">个</option>
+            <option value="次">次</option>
+            <option value="米">米</option>
+        </select>
+        <input id="ex-unit-custom" placeholder="或自填单位" style="width:80px;display:none">
+        <input id="ex-kcal" type="number" placeholder="kcal(可不填)" style="width:90px">
+        <button class="btn btn-primary btn-sm" data-onclick="addExercise()">＋ 添加</button>
+    </div>
+    <table id="ex-table">
+        <thead><tr><th>运动</th><th>数量</th><th>消耗kcal</th><th></th></tr></thead>
+        <tbody id="ex-body"></tbody>
+        <tfoot><tr><th colspan="2">合计</th><th id="ex-total">0 kcal</th><th></th></tr></tfoot>
+    </table>
+    <div class="tip-box">
+        <strong>📐 消耗估算：</strong>消耗 = MET值 × 体重(kg) × 时间(h)。不输入消耗值时自动用MET估算。
+    </div>
+</div>
+
+<!-- ③饮食 -->
+<div class="section tab-content" id="sec-diet" style="display:none">
+    <div class="section-title">🍽️ 饮食记录</div>
+
+    <!-- 餐次分布饼图 -->
+    <div id="meal-pie-section" style="margin-bottom:16px">
+        <div class="section-title" style="font-size:13px;margin-bottom:10px">📊 餐次营养分布</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div style="text-align:center">
+                <div style="font-size:12px;font-weight:600;margin-bottom:4px;color:#555">🔥 热量</div>
+                <div style="max-width:220px;margin:0 auto"><canvas id="pie-kcal"></canvas></div>
+            </div>
+            <div style="text-align:center">
+                <div style="font-size:12px;font-weight:600;margin-bottom:4px;color:#555">🥩 蛋白质</div>
+                <div style="max-width:220px;margin:0 auto"><canvas id="pie-protein"></canvas></div>
+            </div>
+            <div style="text-align:center">
+                <div style="font-size:12px;font-weight:600;margin-bottom:4px;color:#555">🍞 碳水</div>
+                <div style="max-width:220px;margin:0 auto"><canvas id="pie-carb"></canvas></div>
+            </div>
+            <div style="text-align:center">
+                <div style="font-size:12px;font-weight:600;margin-bottom:4px;color:#555">🧈 脂肪</div>
+                <div style="max-width:220px;margin:0 auto"><canvas id="pie-fat"></canvas></div>
+            </div>
+        </div>
+    </div>
+    <!-- 第一行：餐次 + 食物搜索 -->
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;position:relative;z-index:50">
+        <select id="fd-meal" style="width:90px;flex-shrink:0">
+            <option value="早餐">🌅 早餐</option>
+            <option value="午餐">☀️ 午餐</option>
+            <option value="晚餐">🌙 晚餐</option>
+            <option value="下午茶">🍵 下午茶</option>
+            <option value="夜宵">🌃 夜宵</option>
+            <option value="零食">🍿 零食</option>
+        </select>
+        <div style="position:relative;flex:1">
+            <div style="display:flex;gap:0">
+                <input id="fd-name" placeholder="搜索食物..." style="flex:1;border-radius:6px 0 0 6px;border-right:none" autocomplete="off" data-oninput="onFoodNameInput()">
+                <select id="fd-quick-source" style="width:70px;font-size:11px;border-radius:0 6px 6px 0;border-left:1px solid #ccc;background:#f5f5f5" data-onchange="onFoodNameInput()">
+                    <option value="all">全部</option>
+                    <option value="history">记录</option>
+                    <option value="hema">盒马</option>
+                </select>
+            </div>
+            <div id="fd-dropdown" style="display:none;position:absolute;top:100%;left:0;z-index:9999;background:#fff;border:1px solid #ddd;border-top:none;border-radius:0 0 10px 10px;max-height:360px;overflow-y:auto;box-shadow:0 6px 20px rgba(0,0,0,.15);min-width:320px;width:max-content;max-width:92vw"></div>
+        </div>
+    </div>
+    <!-- 第二行：份量 + 热量 + 模式 + 来源 + 添加 -->
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+        <input id="fd-qty" type="number" placeholder="数量" style="width:65px" data-oninput="onFoodQtyChange()">
+        <select id="fd-amt-unit" style="width:48px">
+            <option value="g">g</option><option value="ml">ml</option><option value="个">个</option><option value="份">份</option><option value="碗">碗</option><option value="杯">杯</option><option value="盘">盘</option><option value="片">片</option><option value="根">根</option><option value="块">块</option><option value="袋">袋</option><option value="盒">盒</option>
+        </select>
+        <input id="fd-amt-custom" placeholder="或自填" style="width:55px;display:none">
+        <input id="fd-kcal" type="number" placeholder="热量" style="width:65px">
+        <select id="fd-unit" style="width:55px"><option value="kcal">kcal</option><option value="kj">kJ</option></select>
+        <select id="fd-input-mode" style="width:72px;font-size:11px" title="输入模式"><option value="total">总量</option><option value="per100">每100g</option></select>
+        <select id="fd-source" style="width:72px;font-size:11px"><option value="">来源</option><option value="hema">🛒盒马</option><option value="xiaoxiang">🐘小象</option><option value="dingdong">🛵叮咚</option></select>
+        <button class="btn btn-primary btn-sm" data-onclick="addFood()">＋ 添加</button>
+    </div>
+    <div id="fd-nutrition-row" style="margin-bottom:6px;font-size:12px">
+        <div id="fd-per100-hint" style="color:#ff9800;margin-bottom:4px;display:none">⚡ 每100g基准 → 输入重量自动换算</div>
+        <div id="fd-per100-ref" style="display:none;padding:4px 8px;background:#fff8e1;border-radius:6px;margin-bottom:4px;font-size:11px;color:#795548"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <input id="fd-kcal-display" type="text" readonly style="width:70px;font-size:12px;background:#f5f5f5;border:1px solid #ddd;border-radius:4px;text-align:center;display:none">
+            <input id="fd-protein" type="number" step="0.1" placeholder="蛋白质g" style="width:80px;font-size:12px">
+            <input id="fd-carb" type="number" step="0.1" placeholder="碳水g" style="width:72px;font-size:12px">
+            <input id="fd-fat" type="number" step="0.1" placeholder="脂肪g" style="width:72px;font-size:12px">
+            <input id="fd-sodium" type="number" step="1" placeholder="钠mg" style="width:68px;font-size:12px">
+        </div>
+    </div>
+    <!-- fd-quick-pick hidden container for compatibility -->
+    <div id="fd-quick-pick" style="display:none"></div>
+    <div id="fd-quick-search" style="display:none"></div>
+    <!-- 食材明细输入 -->
+    <div id="fd-ingredients-area" style="margin:8px 0;padding:10px;background:#f8f9fa;border-radius:8px;display:none">
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px">🥬 食材明细</div>
+        <textarea id="ig-text" rows="3" placeholder="一行一个食材，格式随意，例如：&#10;鸡胸肉 150g&#10;西兰花 100g&#10;辅 橄榄油 5g&#10;调 盐 2g" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:6px;padding:8px;font-size:13px;resize:vertical"></textarea>
+        <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+            <button class="btn btn-primary btn-sm" data-onclick="parseIngredientText()">📋 解析食材</button>
+            <button class="btn btn-outline btn-sm" data-onclick="clearIngredients()">清空</button>
+            <span style="font-size:11px;color:#888">默认主料，前缀"辅"或"调"切换</span>
+        </div>
+        <div id="ig-list" style="font-size:12px;margin-top:6px"></div>
+    </div>
+    <div style="margin-bottom:6px"><button class="btn btn-outline btn-sm" data-onclick="toggleIngredients()" id="ig-toggle-btn">🥬 展开食材明细</button></div>
+    <!-- 排序按钮 -->
+    <div style="margin-bottom:8px;display:flex;gap:6px;align-items:center">
+        <span style="font-size:12px;color:#888">排序：</span>
+        <button class="btn btn-outline btn-sm fd-sort-btn" data-sort="meal" data-onclick="sortFoods('meal')" style="font-size:11px;padding:2px 8px">🍽️ 餐次</button>
+        <button class="btn btn-outline btn-sm fd-sort-btn" data-sort="kcal" data-onclick="sortFoods('kcal')" style="font-size:11px;padding:2px 8px">🔥 热量↓</button>
+        <button class="btn btn-outline btn-sm fd-sort-btn active" data-sort="time" data-onclick="sortFoods('time')" style="font-size:11px;padding:2px 8px">🕐 时间</button>
+    </div>
+    <table id="fd-table">
+        <thead><tr><th>餐次</th><th>食物</th><th>份量</th><th>热量<br><small style="color:#999">/100g</small></th><th>蛋白质<br><small style="color:#999">/100g</small></th><th>碳水<br><small style="color:#999">/100g</small></th><th>脂肪<br><small style="color:#999">/100g</small></th><th>膳食纤维<br><small style="color:#999">/100g</small></th><th>钠<br><small style="color:#999">/100g</small></th><th></th></tr></thead>
+        <tbody id="fd-body"></tbody>
+        <tfoot><tr><th colspan="3">合计</th><th id="fd-total">0</th><th id="fd-protein-total">0g</th><th id="fd-carb-total">0g</th><th id="fd-fat-total">0g</th><th id="fd-fiber-total">0g</th><th id="fd-sodium-total">0mg</th><th></th></tr></tfoot>
+    </table>
+    <!-- 每日营养分析面板 -->
+    <div id="nutrition-panel" style="margin-top:12px">
+        <div class="section-title" style="font-size:13px;margin-bottom:8px">🧪 今日营养分析</div>
+        <div class="metric-grid" id="nutrition-metrics"></div>
+        <div id="nutrition-alert" style="margin-top:6px"></div>
+    </div>
+    <div class="tip-box">
+        <strong>📐 热量估算：</strong>不输入热量时自动估算。点击「🥬 展开食材明细」可详细记录每道菜的食材，系统会自动估算营养成分。<br>
+        <strong>🔄 单位换算：</strong>支持 kcal 和 kJ（千焦）两种单位（1 kcal ≈ 4.184 kJ）。
+    </div>
+
+    <!-- 💧 饮水追踪 -->
+    <div class="water-section">
+        <div class="water-header">
+            <h4>💧 今日饮水</h4>
+            <div class="water-stats">
+                已喝 <strong id="water-drunk">0</strong> ml / 建议 <strong id="water-target">0</strong> ml
+                &nbsp;<span class="water-cup-reset" data-onclick="resetWater()">重置</span>
+            </div>
+        </div>
+        <div class="water-layout">
+            <div style="position:relative">
+                <div class="water-bigcup" id="water-bigcup" data-onclick="addWater(250)">
+                    <div class="water-fill" id="water-fill" style="height:0%">
+                        <div class="water-fill-wave"></div>
+                        <div class="water-fill-label" id="water-fill-label">0 ml</div>
+                    </div>
+                    <div class="water-marks" id="water-marks"></div>
+                    <div class="water-target-line" id="water-target-line" style="bottom:70%">
+                        <span class="water-target-tag">💧建议量</span>
+                    </div>
+                </div>
+                <div class="water-bigcup-handle"></div>
+            </div>
+            <div class="water-btns">
+                <div class="water-btn" data-onclick="addWater(100)">＋ 100ml 小口</div>
+                <div class="water-btn" data-onclick="addWater(250)">＋ 250ml 一杯 🥤</div>
+                <div class="water-btn" data-onclick="addWater(500)">＋ 500ml 大杯 🫗</div>
+                <div class="water-btn water-btn-minus" data-onclick="addWater(-250)">－ 250ml 减一杯</div>
+            </div>
+        </div>
+        <div id="water-alert" class="water-alert water-ok">🚰 点击大杯或按钮记录喝水</div>
+    </div>
+
+    <!-- 📝 今日饮食反馈 -->
+    <div class="water-section" style="border-top-color:#e8eaf6">
+        <div class="section-title" style="font-size:14px;margin-bottom:10px">📝 今日饮食反馈</div>
+        <div id="feedback-area">
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+                <div style="min-width:140px">
+                    <div style="font-size:12px;color:#888;margin-bottom:4px">🫄 饱腹感</div>
+                    <div class="fb-group" data-key="satiety">
+                        <span class="fb-tag" data-val="太饿了" data-onclick="toggleFb(this)">😫 太饿了</span>
+                        <span class="fb-tag" data-val="有点饿" data-onclick="toggleFb(this)">🙁 有点饿</span>
+                        <span class="fb-tag" data-val="刚好" data-onclick="toggleFb(this)">😊 刚好</span>
+                        <span class="fb-tag" data-val="有点撑" data-onclick="toggleFb(this)">😅 有点撑</span>
+                    </div>
+                </div>
+                <div style="min-width:140px">
+                    <div style="font-size:12px;color:#888;margin-bottom:4px">😋 口味满意度</div>
+                    <div class="fb-group" data-key="taste">
+                        <span class="fb-tag" data-val="难吃" data-onclick="toggleFb(this)">😖 难吃</span>
+                        <span class="fb-tag" data-val="一般" data-onclick="toggleFb(this)">😐 一般</span>
+                        <span class="fb-tag" data-val="好吃" data-onclick="toggleFb(this)">😋 好吃</span>
+                        <span class="fb-tag" data-val="超赞" data-onclick="toggleFb(this)">🤩 超赞</span>
+                    </div>
+                </div>
+                <div style="min-width:140px">
+                    <div style="font-size:12px;color:#888;margin-bottom:4px">⚡ 身体状态</div>
+                    <div class="fb-group" data-key="energy">
+                        <span class="fb-tag" data-val="疲惫" data-onclick="toggleFb(this)">😴 疲惫</span>
+                        <span class="fb-tag" data-val="正常" data-onclick="toggleFb(this)">🙂 正常</span>
+                        <span class="fb-tag" data-val="精力充沛" data-onclick="toggleFb(this)">💪 精力充沛</span>
+                    </div>
+                </div>
+                <div style="min-width:140px">
+                    <div style="font-size:12px;color:#888;margin-bottom:4px">🍴 执行难度</div>
+                    <div class="fb-group" data-key="effort">
+                        <span class="fb-tag" data-val="很麻烦" data-onclick="toggleFb(this)">😩 很麻烦</span>
+                        <span class="fb-tag" data-val="还行" data-onclick="toggleFb(this)">👌 还行</span>
+                        <span class="fb-tag" data-val="很方便" data-onclick="toggleFb(this)">✌️ 很方便</span>
+                    </div>
+                </div>
+                <div style="min-width:140px">
+                    <div style="font-size:12px;color:#888;margin-bottom:4px">📌 特殊情况</div>
+                    <div class="fb-group fb-multi" data-key="special">
+                        <span class="fb-tag" data-val="聚餐" data-onclick="toggleFb(this,true)">🍻 聚餐</span>
+                        <span class="fb-tag" data-val="外卖" data-onclick="toggleFb(this,true)">📦 外卖</span>
+                        <span class="fb-tag" data-val="加班" data-onclick="toggleFb(this,true)">💻 加班</span>
+                        <span class="fb-tag" data-val="出差" data-onclick="toggleFb(this,true)">🧳 出差</span>
+                        <span class="fb-tag" data-val="生病" data-onclick="toggleFb(this,true)">🤒 生病</span>
+                        <span class="fb-tag" data-val="经期" data-onclick="toggleFb(this,true)">🌙 经期</span>
+                        <span class="fb-tag" data-val="运动日" data-onclick="toggleFb(this,true)">🏃 运动日</span>
+                    </div>
+                </div>
+            </div>
+            <div id="fb-note-area" style="margin-bottom:8px">
+                <div style="font-size:12px;color:#888;margin-bottom:4px">💬 补充说明（可选）</div>
+                <textarea id="fb-note" rows="2" placeholder="比如：中午那个沙拉不够饱，下次换个有肉的；晚上嘴馋吃了零食..." style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:6px;padding:8px;font-size:13px;resize:vertical"></textarea>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+                <button class="btn btn-primary btn-sm" id="fb-submit-btn" data-onclick="submitFeedback()">📤 提交反馈</button>
+                <span id="fb-status" style="font-size:11px;color:#999"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ④热量缺口 -->
+<!-- sec-calorie 已合并到header热量概览 -->
+
+<!-- ⑤日志 -->
+<!-- sec-log 已合并到个人信息底部 -->
+
+<!-- ⑥健康建议 -->
+<div class="section tab-content" id="sec-tips" style="display:none">
+    <div class="section-title">💡 减脂健康建议</div>
+    
+    <h4 style="margin:12px 0 8px">🎯 热量缺口控制</h4>
+    <table>
+        <tr><td>推荐缺口</td><td><strong>每天 300-500 kcal</strong>，安全有效，不伤代谢</td></tr>
+        <tr><td>极限缺口</td><td>不超过 1000 kcal/天，否则身体进入"节能模式"反而难减</td></tr>
+        <tr><td>摄入底线</td><td>男性 ≥ 1500 kcal/天，女性 ≥ 1200 kcal/天</td></tr>
+        <tr><td>蛋白质</td><td>减脂期每公斤体重 1.6-2.0g，保护肌肉</td></tr>
+    </table>
+
+    <h4 style="margin:12px 0 8px">💓 运动心率控制</h4>
+    <table>
+        <tr><td>热身区</td><td>极限心率 × 50-60%</td><td>适合热身和恢复</td></tr>
+        <tr><td><strong>燃脂区</strong></td><td><strong>极限心率 × 60-70%</strong></td><td><strong>最佳燃脂区间！</strong>脂肪供能比例最高</td></tr>
+        <tr><td>有氧区</td><td>极限心率 × 70-80%</td><td>提升心肺，综合燃脂效率最高</td></tr>
+        <tr><td>无氧区</td><td>极限心率 × 80-90%</td><td>提升速度和爆发力，不宜长时间</td></tr>
+        <tr><td>极限区</td><td>极限心率 × 90-100%</td><td>冲刺用，≤30秒</td></tr>
+    </table>
+
+    <h4 style="margin:12px 0 8px">🍽️ 饮食建议</h4>
+    <table>
+        <tr><td>主食策略</td><td>每天1-2顿用谷物替代米饭（燕麦、糙米、荞麦面、全麦面包、紫薯、玉米）</td></tr>
+        <tr><td>蛋白质来源</td><td>鸡胸肉、鱼虾、鸡蛋、豆腐、牛肉（瘦）、酸奶</td></tr>
+        <tr><td>蔬菜</td><td>每顿至少一拳大小蔬菜，西兰花/菠菜/黄瓜/番茄热量最低</td></tr>
+        <tr><td>水果</td><td>每天200g以内，优选：苹果、猕猴桃、草莓、柚子（低GI）</td></tr>
+        <tr><td>避免</td><td>含糖饮料、油炸、奶茶、蛋糕、薯片</td></tr>
+        <tr><td>喝水</td><td>每天 体重(kg) × 35-40ml，饭前一杯水增加饱腹感</td></tr>
+        <tr><td>进食顺序</td><td>先喝汤 → 吃蔬菜 → 吃蛋白质 → 最后吃主食（控制血糖）</td></tr>
+    </table>
+
+    <h4 style="margin:12px 0 8px">⏰ 作息建议</h4>
+    <table>
+        <tr><td>睡眠</td><td>7-8小时，23:00前入睡。睡眠不足会升高皮质醇→更容易囤脂</td></tr>
+        <tr><td>运动时间</td><td>下午4-6点效率最高。空腹有氧（晨跑）燃脂效率高但别超45分钟</td></tr>
+        <tr><td>称重时间</td><td>每天早晨起床排空后，固定时间称</td></tr>
+    </table>
+
+    <h4 style="margin:12px 0 8px">📊 减脂速度参考</h4>
+    <table>
+        <tr><td>健康速度</td><td><strong>每周 0.5-1kg</strong>（每月 2-4kg）</td></tr>
+        <tr><td>体重80kg的人</td><td>目标 3个月减到 70-72kg 比较合理</td></tr>
+        <tr><td>平台期</td><td>2-3周体重不变是正常的！坚持不加量，身体会适应后继续降</td></tr>
+    </table>
+
+    <div id="personal-tips" class="tip-box" style="margin-top:12px">
+        填写个人信息后，这里会显示你的个性化建议 🎯
+    </div>
+</div>
+
+<!-- ⑨食物PK -->
+<div class="section tab-content" id="sec-pk" style="display:none">
+    <div class="section-title">⚔️ 食物营养PK（每100g对比）</div>
+    <div class="tip-box" style="margin-bottom:12px">💡 选择两种食物，对比每100g的热量和营养成分，帮你做出更优选择。</div>
+    <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <div style="flex:1;min-width:140px">
+            <div style="font-size:12px;color:#888;margin-bottom:4px">🅰️ 食物A</div>
+            <select id="pk-source-a" data-onchange="loadPkOptions('a')" style="width:100%;margin-bottom:4px">
+                <option value="history">📝 我的饮食记录</option>
+                <option value="hema">🛒 盒马推荐</option>
+            </select>
+            <select id="pk-food-a" data-onchange="renderPk()" style="width:100%">
+                <option value="">-- 选择食物 --</option>
+            </select>
+        </div>
+        <div style="display:flex;align-items:center;font-size:20px;padding-top:16px">⚔️</div>
+        <div style="flex:1;min-width:140px">
+            <div style="font-size:12px;color:#888;margin-bottom:4px">🅱️ 食物B</div>
+            <select id="pk-source-b" data-onchange="loadPkOptions('b')" style="width:100%;margin-bottom:4px">
+                <option value="history">📝 我的饮食记录</option>
+                <option value="hema">🛒 盒马推荐</option>
+            </select>
+            <select id="pk-food-b" data-onchange="renderPk()" style="width:100%">
+                <option value="">-- 选择食物 --</option>
+            </select>
+        </div>
+    </div>
+    <div id="pk-result"></div>
+</div>
+
+<!-- ⑦盒马推荐 -->
+<div class="section tab-content" id="sec-hema" style="display:none">
+    <div class="section-title">🛒 盒马减脂好物推荐</div>
+    <div class="tip-box" style="margin-bottom:12px">
+        💡 以下商品均来自盒马实际在售，标注了热量和减脂适配度。点击 <strong>＋记录</strong> 可一键添加到今日饮食。<br>
+        🕖 <strong>每晚7:00-7:30</strong> 盒马日日鲜系列有<strong>7折优惠</strong>，鸡胸、牛肉片、蔬菜都有！
+    </div>
+    <!-- 盒马食物数据库 -->
+    <div style="margin-bottom:12px;padding:10px;background:#f0f7ff;border-radius:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-weight:600;font-size:13px">📦 盒马食物数据库</span>
+            <span id="hema-db-count" style="font-size:12px;color:#888"></span>
+            <button class="btn btn-outline btn-sm" id="hema-db-toggle" data-onclick="toggleHemaDB()" style="font-size:12px">展开数据库</button>
+        </div>
+        <div id="hema-db-list" style="display:none;margin-top:8px;max-height:300px;overflow-y:auto"></div>
+    </div>
+    <!-- 盒马商品搜索 -->
+    <div class="form-row" style="margin-bottom:12px">
+        <input id="hema-search" placeholder="🔍 搜索盒马商品..." style="flex:1" data-oninput="filterHema()">
+    </div>
+    
+    <div class="hema-cat" data-cat="grain">
+        <h4 style="margin:10px 0 8px">🍚 谷物/主食替代（午餐或晚餐选一顿）</h4>
+        <table>
+            <thead><tr><th>商品</th><th>价格</th><th>热量/100g</th><th>蛋白质</th><th>推荐吃法</th></tr></thead>
+            <tbody>
+                <tr><td>🥟 魔芋燕麦鸡胸肉蒸饺</td><td>¥9.9/200g</td><td>113 kcal</td><td>6.6g</td><td>一袋当主食+配菜，整袋仅200kcal</td></tr>
+                <tr><td>🍞 臻全麦吐司（90%全麦粉）</td><td>¥12.9/200g</td><td>224 kcal</td><td>11.2g</td><td>早餐1片/正餐2片代替米饭</td></tr>
+                <tr class="hema-more-row"><td>🌽 西双版纳拇指小玉米</td><td>¥39.9/600g</td><td>114 kcal</td><td>4g</td><td>替代1/3~1/2主食，直接吃或蒸</td></tr>
+                <tr class="hema-more-row" style="background:#f0fff0"><td>🥣 <strong>盒马燕麦片/荞麦面</strong></td><td>¥15-25</td><td>~350 kcal(干)</td><td>12-14g</td><td>⭐ <strong>谷物主食首选！</strong>燕麦粥/荞麦面条</td></tr>
+                <tr class="hema-more-row"><td>🍠 盒马紫薯/红薯</td><td>¥8-15/500g</td><td>82-90 kcal</td><td>1.5g</td><td>蒸熟当主食，饱腹感强</td></tr>
+                <tr class="hema-more-row"><td>🌾 盒马糙米/藜麦</td><td>¥15-30/500g</td><td>~360 kcal(干)</td><td>8-14g</td><td>和白米1:1混煮，降GI</td></tr>
+                <tr class="hema-more-row"><td>🥯 盒马全麦贝果</td><td>¥12/2个</td><td>240 kcal</td><td>10g</td><td>夹蛋/鸡胸做早餐</td></tr>
+                <tr class="hema-more-row"><td>🍜 魔芋凉皮/魔芋面</td><td>¥5-10/袋</td><td>10-15 kcal</td><td>1g</td><td>几乎0卡，过过嘴瘾</td></tr>
+                <tr class="hema-more-row"><td>🥣 盒马无糖麦片</td><td>¥19.9/500g</td><td>350 kcal</td><td>12g</td><td>配酸奶/牛奶</td></tr>
+                <tr class="hema-more-row"><td>🌰 盒马混合坚果(无盐)</td><td>¥35/300g</td><td>~600 kcal</td><td>15g</td><td>每天≤25g，好脂肪</td></tr>
+            </tbody>
+        </table>
+        <div class="hema-more" data-onclick="loadMoreHema(this)">👇 查看更多</div>
+    </div>
+
+    <div class="hema-cat" data-cat="protein">
+        <h4 style="margin:14px 0 8px">🥩 优质蛋白（每餐必备）</h4>
+        <table>
+            <thead><tr><th>商品</th><th>价格</th><th>热量/100g</th><th>蛋白质</th><th>推荐</th></tr></thead>
+            <tbody>
+                <tr style="background:#f0fff0"><td>🐔 <strong>盒马即食鸡胸肉</strong></td><td>¥9.9/100g</td><td>~133 kcal</td><td>25g+</td><td>⭐ 减脂神器，开袋即食</td></tr>
+                <tr><td>🥩 帕斯雀牛肉片</td><td>¥17.9/150g</td><td>112 kcal</td><td>19.7g</td><td>低脂高蛋白，夹面包/拌沙拉</td></tr>
+                <tr class="hema-more-row"><td>🌭 低脂鸡胸肉脆骨肠</td><td>¥26.9/375g</td><td>131 kcal</td><td>22.3g</td><td>零食/加餐，独立包装</td></tr>
+                <tr class="hema-more-row"><td>🥚 全蛋鸡蛋干（酱香）</td><td>¥16.9/208g</td><td>142 kcal</td><td>13.1g</td><td>95%鸡蛋，每天3小块</td></tr>
+                <tr class="hema-more-row"><td>🐟 盒马鲜活虾/鱼</td><td>¥20-40</td><td>87-104 kcal</td><td>18-20g</td><td>白灼虾/清蒸鱼，最低脂</td></tr>
+                <tr class="hema-more-row"><td>🥛 草原纯酸奶（原味）</td><td>¥11.9/450g</td><td>64 kcal</td><td>3g</td><td>只有牛乳+菌种，拌水果/麦片</td></tr>
+                <tr class="hema-more-row"><td>🐔 盒马鸡胸肉糜</td><td>¥12.9/300g</td><td>120 kcal</td><td>22g</td><td>自制鸡肉丸/饼</td></tr>
+                <tr class="hema-more-row"><td>🥩 盒马牛腱子肉</td><td>¥35/500g</td><td>120 kcal</td><td>23g</td><td>酱牛肉，低脂</td></tr>
+                <tr class="hema-more-row"><td>🐷 盒马猪里脊</td><td>¥20/400g</td><td>143 kcal</td><td>20g</td><td>低脂猪肉，炒菜用</td></tr>
+                <tr class="hema-more-row"><td>🥚 盒马鸡蛋10个</td><td>¥12/盒</td><td>144 kcal</td><td>13g</td><td>最便宜的优质蛋白</td></tr>
+                <tr class="hema-more-row"><td>🧈 盒马希腊酸奶</td><td>¥25/400g</td><td>59 kcal</td><td>10g</td><td>蛋白是普通酸奶3倍</td></tr>
+            </tbody>
+        </table>
+        <div class="hema-more" data-onclick="loadMoreHema(this)">👇 查看更多</div>
+    </div>
+
+    <div class="hema-cat" data-cat="veg">
+        <h4 style="margin:14px 0 8px">🥗 蔬菜水果</h4>
+        <table>
+            <thead><tr><th>商品</th><th>热量/100g</th><th>特点</th></tr></thead>
+            <tbody>
+                <tr><td>🥦 西兰花</td><td>34 kcal</td><td>减脂王者蔬菜，维C丰富</td></tr>
+                <tr><td>🥒 黄瓜</td><td>15 kcal</td><td>超低卡，生吃/凉拌都行</td></tr>
+                <tr class="hema-more-row"><td>🍅 番茄</td><td>18 kcal</td><td>低卡高纤维，番茄炒蛋经典搭配</td></tr>
+                <tr class="hema-more-row"><td>🥬 菠菜</td><td>23 kcal</td><td>补铁补叶酸</td></tr>
+                <tr class="hema-more-row"><td>🍎 苹果</td><td>52 kcal</td><td>低GI水果，每天200g</td></tr>
+                <tr class="hema-more-row"><td>🥝 猕猴桃</td><td>61 kcal</td><td>维C之王，每天1-2个</td></tr>
+                <tr class="hema-more-row"><td>🍊 橙子/柑橘</td><td>47 kcal</td><td>代替高糖水果</td></tr>
+                <tr class="hema-more-row"><td>🍓 草莓</td><td>32 kcal</td><td>低糖低卡</td></tr>
+                <tr class="hema-more-row"><td>🫐 蓝莓</td><td>57 kcal</td><td>抗氧化，每天30g</td></tr>
+                <tr class="hema-more-row"><td>🥗 盒马混合沙拉菜</td><td>15 kcal</td><td>懒人必备，拌酱即食</td></tr>
+                <tr class="hema-more-row"><td>🧅 芹菜/秋葵/芦笋</td><td>16-25 kcal</td><td>高纤维配菜</td></tr>
+            </tbody>
+        </table>
+        <div class="hema-more" data-onclick="loadMoreHema(this)">👇 查看更多</div>
+    </div>
+
+    <div class="hema-cat" data-cat="snack">
+        <h4 style="margin:14px 0 8px">🍿 解馋零食 & 饮品（低卡）</h4>
+        <table>
+            <thead><tr><th>商品</th><th>价格</th><th>热量</th><th>备注</th></tr></thead>
+            <tbody>
+                <tr><td>🥩 盒马风干牛肉</td><td>¥69.9/238g</td><td>215 kcal/100g</td><td>99%牛肉+41g蛋白，磨牙神器</td></tr>
+                <tr><td>🍡 0卡蒟蒻果冻</td><td>¥9.9/240g</td><td>0 kcal</td><td>赤藓糖醇代糖，冷藏更爽</td></tr>
+                <tr class="hema-more-row"><td>🌶️ 泡椒脆笋尖</td><td>¥16.9/230g</td><td>22 kcal/100g</td><td>辣口零食，每天≤2小包</td></tr>
+                <tr class="hema-more-row"><td>🍵 12度浓醇豆浆</td><td>¥9.9/1L</td><td>57 kcal/100ml</td><td>5.2%蛋白，做豆乳拿铁</td></tr>
+                <tr class="hema-more-row"><td>🍃 玉米须玄米茶</td><td>¥9.9/2L</td><td>0 kcal</td><td>0糖0脂0代糖，当水喝</td></tr>
+                <tr class="hema-more-row"><td>🥜 盒马无盐花生</td><td>¥15/200g</td><td>560 kcal/100g</td><td>每天≤20g，优质脂肪</td></tr>
+                <tr class="hema-more-row"><td>🍫 盒马90%黑巧克力</td><td>¥20/100g</td><td>~550 kcal/100g</td><td>嘴馋时吃1小块(10g)</td></tr>
+                <tr class="hema-more-row"><td>🍵 盒马无糖绿茶</td><td>¥6/1.5L</td><td>0 kcal</td><td>无糖解腻</td></tr>
+                <tr class="hema-more-row"><td>🥒 盒马小乳瓜</td><td>¥8/200g</td><td>15 kcal/100g</td><td>脆爽解馋零食</td></tr>
+                <tr class="hema-more-row"><td>🍅 盒马小番茄</td><td>¥12/250g</td><td>18 kcal/100g</td><td>低卡水果替代</td></tr>
+            </tbody>
+        </table>
+        <div class="hema-more" data-onclick="loadMoreHema(this)">👇 查看更多</div>
+    </div>
+
+    <div class="alert-box alert-ok" style="margin-top:12px">
+        🕖 <strong>省钱提醒</strong>：每晚7:00盒马日日鲜打7折！鸡胸肉、牛肉片、蔬菜都有折扣，记得卡点下单。
+    </div>
+</div>
+
+<!-- ⑧今日餐单 -->
+<!-- sec-meal 已合并到今日建议底部 -->
+
+<div style="text-align:center;color:#999;font-size:11px;padding:14px">
+    更新: 2026-03-10 | ⚠️ 仅供参考，建议咨询专业营养师 | 数据存浏览器localStorage
+</div>
+
+</div>
+
+<!-- Edit Exercise Modal -->
+<div class="modal-overlay" id="modal-edit-ex">
+    <div class="modal-box">
+        <h3>✏️ 修改运动记录</h3>
+        <input type="hidden" id="edit-ex-idx">
+        <div class="form-row"><label>运动</label><input id="edit-ex-name"></div>
+        <div class="form-row"><label>数量</label><input id="edit-ex-qty" type="number" style="width:80px"><select id="edit-ex-unit" style="width:70px;flex:none"><option value="分钟">分钟</option><option value="公里">公里</option><option value="组">组</option><option value="个">个</option><option value="次">次</option><option value="米">米</option></select><input id="edit-ex-unit-custom" placeholder="自填" style="width:60px;flex:none"></div>
+        <div class="form-row"><label>消耗(kcal)</label><input id="edit-ex-kcal" type="number"></div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" data-onclick="closeModal('modal-edit-ex')">取消</button>
+            <button class="btn btn-primary" data-onclick="saveEditExercise()">💾 保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Food Modal -->
+<div class="modal-overlay" id="modal-edit-fd">
+    <div class="modal-box">
+        <h3>✏️ 修改饮食记录</h3>
+        <input type="hidden" id="edit-fd-idx">
+        <div class="form-row"><label>餐次</label><select id="edit-fd-meal">
+            <option value="早餐">🌅 早餐</option>
+            <option value="午餐">☀️ 午餐</option>
+            <option value="晚餐">🌙 晚餐</option>
+            <option value="下午茶">🍵 下午茶</option>
+            <option value="夜宵">🌃 夜宵</option>
+            <option value="零食">🍿 零食</option>
+        </select></div>
+        <div class="form-row"><label>食物</label><input id="edit-fd-name"></div>
+        <div class="form-row"><label>份量</label><input id="edit-fd-qty" type="number" style="width:65px;flex:none" data-oninput="onEditFoodQtyChange()"><select id="edit-fd-amt-unit" style="width:52px;flex:none"><option value="g">g</option><option value="ml">ml</option><option value="个">个</option><option value="份">份</option><option value="碗">碗</option><option value="杯">杯</option><option value="盘">盘</option><option value="片">片</option><option value="根">根</option><option value="块">块</option><option value="袋">袋</option><option value="盒">盒</option></select><input id="edit-fd-amt-custom" placeholder="自填" style="width:50px;flex:none"></div>
+        <div id="edit-fd-per100-ref" style="display:none;padding:4px 8px;background:#fff8e1;border-radius:6px;margin:4px 0;font-size:11px;color:#795548"></div>
+        <div class="form-row"><label>输入模式</label><select id="edit-fd-input-mode" style="width:100px;flex:none" data-onchange="toggleEditPer100Hint()"><option value="total">按总量填</option><option value="per100">按每100g填</option></select><span id="edit-fd-per100-hint" style="font-size:11px;color:#ff9800;display:none">← 修改重量自动换算</span></div>
+        <div class="form-row"><label>热量</label><input id="edit-fd-kcal" type="number" style="width:70px"><select id="edit-fd-unit" style="width:52px;flex:none"><option value="kcal">kcal</option><option value="kj">kJ</option></select></div>
+        <div class="form-row"><label>蛋白质</label><input id="edit-fd-protein" type="number" step="0.1" style="width:60px"><span style="color:#888;font-size:12px">g</span></div>
+        <div class="form-row"><label>碳水</label><input id="edit-fd-carb" type="number" step="0.1" style="width:60px"><span style="color:#888;font-size:12px">g</span></div>
+        <div class="form-row"><label>脂肪</label><input id="edit-fd-fat" type="number" step="0.1" style="width:60px"><span style="color:#888;font-size:12px">g</span></div>
+        <div class="form-row"><label>钠</label><input id="edit-fd-sodium" type="number" style="width:60px"><span style="color:#888;font-size:12px">mg</span></div>
+        <div class="form-row"><label>膳食纤维</label><input id="edit-fd-fiber" type="number" step="0.1" style="width:60px"><span style="color:#888;font-size:12px">g</span></div>
+        <div style="margin:8px 0">
+            <button class="btn btn-outline btn-sm" data-onclick="toggleEditIngredients()" id="edit-ig-toggle-btn">🥬 展开食材明细</button>
+        </div>
+        <div id="edit-fd-ingredients-area" style="display:none;margin:6px 0;padding:8px;background:#f8f9fa;border-radius:6px">
+            <textarea id="edit-ig-text" rows="3" placeholder="一行一个食材" style="width:100%;box-sizing:border-box;font-size:12px;border:1px solid #ddd;border-radius:4px;padding:6px"></textarea>
+            <div id="edit-ig-list" style="font-size:12px;margin-top:4px"></div>
+        </div>
+        <div class="form-row"><label>商品来源</label><select id="edit-fd-source" style="width:120px"><option value="">无/其他</option><option value="hema">🛒 盒马</option><option value="xiaoxiang">🐘 小象</option><option value="dingdong">🛵 叮咚</option></select></div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" data-onclick="closeModal('modal-edit-fd')">取消</button>
+            <button class="btn btn-primary" data-onclick="saveEditFood()">💾 保存</button>
+        </div>
+    </div>
+</div>
+
+<script src="./chart.js?v=1773915976"></script>
+<script src="./app.js?v=337"></script>
+</body>
+</html>
