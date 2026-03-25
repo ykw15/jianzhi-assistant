@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>&#128218; 读书笔记</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap');
+:root{--bg:#faf7f2;--card:#fff;--primary:#8b5e3c;--pl:#c49a6c;--accent:#e07b4f;--text:#2c2416;--text2:#7a6f5e;--border:#e8dfd3;--shadow:0 4px 20px rgba(139,94,60,.10);--r:16px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);line-height:1.8;min-height:100vh}
+
+.navbar{position:sticky;top:0;z-index:100;background:rgba(250,247,242,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 40px}
+.ni{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px}
+.brand{font-family:'Noto Serif SC',serif;font-size:18px;font-weight:700;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.nav{display:flex;gap:28px;list-style:none}
+.nav a{text-decoration:none;color:var(--text2);font-size:14px;transition:color .2s}
+.nav a:hover,.nav a.active{color:var(--primary)}
+.back-btn{background:var(--primary);color:#fff!important;padding:7px 18px;border-radius:30px;font-weight:500!important;transition:background .2s;text-decoration:none;font-size:13px;display:none}
+.back-btn:hover{background:var(--accent)}
+
+.hero{max-width:1100px;margin:0 auto;padding:72px 40px 48px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.hero h1{font-family:'Noto Serif SC',serif;font-size:44px;font-weight:700;line-height:1.25;margin-bottom:18px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero .sub{font-size:15px;color:var(--text2);margin-bottom:32px;font-weight:300}
+.stats{display:flex;gap:36px}
+.stat .n{font-family:'Noto Serif SC',serif;font-size:32px;font-weight:700;color:var(--primary)}
+.stat .l{font-size:11px;color:var(--text2)}
+.visual{display:flex;justify-content:center}
+.stack{position:relative;width:240px;height:300px}
+.stack .bk{position:absolute;width:165px;height:240px;border-radius:5px 12px 12px 5px;box-shadow:0 8px 28px rgba(0,0,0,.16);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px;transition:transform .3s}
+.stack .bk:nth-child(1){background:linear-gradient(145deg,#8b5e3c,#a0724a);top:8px;left:0;transform:rotate(-5deg);z-index:1}
+.stack .bk:nth-child(2){background:linear-gradient(145deg,#e07b4f,#e8946e);top:18px;left:28px;transform:rotate(2deg);z-index:2}
+.stack .bk:nth-child(3){background:linear-gradient(145deg,#1e3a5f,#2a4a7a);top:28px;left:56px;transform:rotate(7deg);z-index:3}
+.stack .bk:hover{transform:rotate(0deg) translateY(-8px)!important;z-index:10!important}
+.stack .bk .ic{font-size:44px;margin-bottom:10px}
+.stack .bk .ti{color:rgba(255,255,255,.95);font-size:13px;font-weight:600;text-align:center}
+.stack .bk .au{color:rgba(255,255,255,.55);font-size:11px;margin-top:5px}
+.fbar{max-width:1100px;margin:0 auto;padding:0 40px 28px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.ftag{padding:6px 16px;border-radius:30px;border:1.5px solid var(--border);background:var(--card);font-size:12px;color:var(--text2);cursor:pointer;transition:all .2s}
+.ftag:hover,.ftag.on{border-color:var(--primary);color:var(--primary);background:#f5ede3}
+.grid{max-width:1100px;margin:0 auto;padding:0 40px 80px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}
+.bkcard{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s}
+.bkcard:hover{transform:translateY(-5px);box-shadow:0 14px 40px rgba(139,94,60,.18)}
+.bkcv{height:190px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.bkcv .ptn{position:absolute;inset:0;opacity:.1;background-image:radial-gradient(circle,currentColor 1px,transparent 1px);background-size:26px 26px}
+.bkcv .ic{font-size:60px;position:relative;z-index:1}
+.bkcv .ti{position:absolute;bottom:12px;left:14px;right:14px;font-size:15px;font-weight:600;color:rgba(255,255,255,.95);text-shadow:0 2px 8px rgba(0,0,0,.3);z-index:1}
+.bkbody{padding:18px 20px 20px}
+.bkmeta{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.bkcat{font-size:10px;font-weight:500;padding:3px 9px;border-radius:20px;background:#f0e8df;color:var(--primary)}
+.bkrating{margin-left:auto;color:#f5a623;font-size:12px}
+.bkauthor{font-size:12px;color:var(--text2);margin-bottom:8px}
+.bkdesc{font-size:12px;color:var(--text2);font-weight:300;line-height:1.65}
+.bkbtn{margin-top:14px;background:var(--primary);color:#fff;border:none;padding:9px 0;border-radius:10px;font-size:13px;cursor:pointer;transition:background .2s;width:100%;display:flex;align-items:center;justify-content:center;gap:6px}
+.bkbtn:hover{background:var(--accent)}
+.bkfooter{padding:10px 20px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap}
+.bktag{font-size:10px;padding:2px 7px;background:var(--bg);border-radius:4px;color:var(--text2)}
+footer{text-align:center;padding:40px;color:var(--text2);font-size:12px;border-top:1px solid var(--border)}
+
+#r-view{display:none;min-height:100vh;flex-direction:row}
+#r-view.on{display:flex}
+.toc{width:260px;min-width:260px;background:var(--card);border-right:1px solid var(--border);height:100vh;position:sticky;top:0;overflow-y:auto;display:flex;flex-direction:column}
+.toc-h{padding:24px 20px 16px;border-bottom:1px solid var(--border)}
+.toc-book{font-family:'Noto Serif SC',serif;font-size:15px;font-weight:700;color:var(--primary);margin-bottom:4px}
+.toc-author{font-size:11px;color:var(--text2)}
+.toc-nav{padding:12px 0;flex:1}
+.toc-item{padding:10px 20px;font-size:13px;color:var(--text2);cursor:pointer;transition:all .15s;border-left:3px solid transparent;display:block}
+.toc-item:hover{background:var(--bg);color:var(--text)}
+.toc-item.on{background:#f5ede3;color:var(--primary);border-left-color:var(--accent);font-weight:500}
+.toc-back{padding:16px 20px;border-top:1px solid var(--border)}
+.toc-back-btn{display:flex;align-items:center;gap:6px;color:var(--text2);font-size:13px;cursor:pointer;background:none;border:1px solid var(--border);border-radius:8px;padding:8px 14px;width:100%;transition:all .2s}
+.toc-back-btn:hover{border-color:var(--primary);color:var(--primary)}
+.r-content{flex:1;overflow-y:auto}
+.prog{position:fixed;top:0;left:260px;right:0;height:3px;z-index:50;background:transparent}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));width:0;transition:width .3s}
+
+.sec{}
+.cover-page{text-align:center;padding:100px 40px 80px;border-bottom:1px solid var(--border)}
+.cover-icon{font-size:72px;margin-bottom:24px}
+.cover-page h1{font-family:'Noto Serif SC',serif;font-size:42px;font-weight:700;margin-bottom:12px}
+.cover-sub{font-size:18px;color:var(--text2);font-weight:300;margin-bottom:28px}
+.cover-author{font-size:13px;color:var(--accent);margin-bottom:6px}
+.cover-date{font-size:12px;color:var(--text2)}
+.cover-stats{display:flex;justify-content:center;gap:48px;margin-top:48px;padding-top:32px;border-top:1px solid var(--border)}
+.cover-stat .n{font-family:'Noto Serif SC',serif;font-size:28px;font-weight:700;color:var(--primary)}
+.cover-stat .l{font-size:11px;color:var(--text2);margin-top:4px}
+
+.ch-header{padding:48px 40px 32px;border-bottom:2px solid var(--border);margin-bottom:36px}
+.ch-header.alt{background:var(--bg)}
+.ch-eyebrow{font-size:11px;font-weight:600;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+.ch-header h2{font-family:'Noto Serif SC',serif;font-size:28px;font-weight:700;margin-bottom:10px}
+.ch-header .sub{font-size:14px;color:var(--text2);font-weight:300}
+.doc-body{max-width:760px;margin:0 auto;padding:36px 40px 80px}
+.section{margin-bottom:40px}
+.section h3{font-family:'Noto Serif SC',serif;font-size:18px;font-weight:600;margin-bottom:14px}
+.section h4{font-size:15px;font-weight:600;margin-bottom:10px}
+.section p{font-size:14px;color:var(--text2);margin-bottom:14px;font-weight:300;line-height:1.9}
+blockquote{background:var(--bg);border-left:4px solid var(--accent);padding:16px 20px;border-radius:0 12px 12px 0;margin:20px 0;font-family:'Noto Serif SC',serif;font-size:15px;color:var(--primary);line-height:1.8}
+blockquote cite{display:block;margin-top:10px;font-size:12px;color:var(--text2);font-family:'Noto Sans SC',sans-serif;font-style:normal}
+.table-wrap{overflow-x:auto;margin:20px 0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 14px;background:#f5ede3;color:var(--primary);font-weight:600;border-bottom:2px solid var(--border)}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2)}
+tr:last-child td{border-bottom:none}
+ul,ol{padding-left:24px;margin:14px 0}
+li{font-size:14px;color:var(--text2);margin-bottom:8px;font-weight:300;line-height:1.8}
+li strong,strong{color:var(--text);font-weight:500}
+hr{border:none;border-top:1px solid var(--border);margin:36px 0}
+.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:500;margin-right:6px;margin-bottom:4px}
+.badge-r{background:rgba(239,68,68,.1);color:#ef4444}
+.badge-o{background:rgba(249,115,22,.1);color:#f97316}
+.badge-g{background:rgba(34,197,94,.1);color:#22c55e}
+.badge-b{background:rgba(59,130,246,.1);color:#3b82f6}
+.badge-p{background:rgba(139,92,246,.1);color:#8b5cf6}
+.badge-pk{background:rgba(236,72,153,.1);color:#ec4899}
+.key-box{background:linear-gradient(135deg,rgba(224,123,79,.08),rgba(139,94,60,.05));border:1.5px solid var(--pl);border-radius:12px;padding:20px 24px;margin:24px 0;display:flex;align-items:flex-start;gap:14px}
+.key-box .ki{font-size:28px;flex-shrink:0;margin-top:-2px}
+.key-box .kt{font-size:13px;font-weight:600;color:var(--primary);margin-bottom:6px}
+.key-box .kb{font-size:14px;color:var(--text2);font-weight:300;line-height:1.8}
+.flow{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:24px 0}
+.flow-item{background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;text-align:center;min-width:100px}
+.flow-a{font-size:18px;color:var(--accent)}
+.quote-item{background:var(--bg);border-radius:10px;padding:16px 20px;margin-bottom:12px;border-left:3px solid var(--pl)}
+.quote-item p{font-family:'Noto Serif SC',serif;font-size:14px;color:var(--text);margin-bottom:0}
+.checklist{list-style:none;padding:0;margin:20px 0}
+.checklist li{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;margin-bottom:6px;background:var(--card);border:1px solid var(--border);cursor:pointer;transition:all .2s;font-size:13px}
+.checklist li:hover{border-color:var(--pl);background:#fdf9f5}
+.checklist li.done{color:var(--text2);text-decoration:line-through;background:var(--bg)}
+.checklist li .cb{font-size:16px}
+.formula-box{background:linear-gradient(135deg,#1e3a5f,#0f172a);border-radius:16px;padding:32px;text-align:center;margin:28px 0}
+.formula-box p{color:rgba(255,255,255,.9);font-family:'Noto Serif SC',serif;font-size:22px;font-weight:700;margin-bottom:8px}
+.formula-box .fsub{color:rgba(255,255,255,.5);font-size:13px}
+.back-top{position:fixed;bottom:30px;right:30px;width:44px;height:44px;border-radius:50%;background:var(--primary);color:#fff;border:none;cursor:pointer;font-size:18px;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(139,94,60,.3);transition:all .2s;z-index:40}
+.back-top:hover{background:var(--accent);transform:translateY(-2px)}
+
+@media(max-width:768px){
+.hero{grid-template-columns:1fr;padding:48px 24px 36px;gap:36px}
+.hero h1{font-size:32px}
+.visual{order:-1}
+.stack{width:180px;height:230px}
+.stack .bk{width:125px;height:185px}
+.navbar-nav{display:none}
+.navbar{padding:0 20px}
+.fbar,.grid{padding-left:20px;padding-right:20px}
+.toc{display:none}
+.doc-body{padding:32px 20px 80px}
+.cover-page{padding:64px 20px 48px}
+.cover-page h1{font-size:30px}
+.prog{left:0}
+.ch-header{padding:36px 20px 24px}
+.ch-header h2{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+<div class="ni">
+<a href="#" class="brand" onclick="showShelf()">&#128218; 读书笔记</a>
+<ul class="nav">
+<li><a href="#" class="active" onclick="showShelf();return false" id="nav-shelf">书架</a></li>
+<li><a href="#" onclick="if(window.curBook)showSec(START_ID);return false" id="nav-toc">目录</a></li>
+</ul>
+<a href="#" class="back-btn" onclick="showShelf();return false" id="nav-back">&#8592; 返回书架</a>
+</div>
+</nav>
+
+<div id="shelf-view">
+<section class="hero">
+<div>
+<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:14px">Reading Notes</div>
+<h1>每一本书<br>都是一次<em>思维重构</em></h1>
+<p class="sub">记录读过的书、摘录触动的句子、整理内化后的思考。<br>知识需要沉淀，思考需要留痕。</p>
+<div class="stats">
+<div class="stat"><div class="n" id="s-books">0</div><div class="l">已读书籍</div></div>
+<div class="stat"><div class="n" id="s-notes">0</div><div class="l">读书笔记</div></div>
+<div class="stat"><div class="n">&#8734;</div><div class="l">持续更新</div></div>
+</div>
+</div>
+<div class="visual">
+<div class="stack">
+<div class="bk"><div class="ic">&#128218;</div><div class="ti">读书</div><div class="au">手边常备</div></div>
+<div class="bk"><div class="ic">&#9998;</div><div class="ti">记录</div><div class="au">留下思考</div></div>
+<div class="bk"><div class="ic">&#128161;</div><div class="ti">内化</div><div class="au">为我所用</div></div>
+</div>
+</div>
+</section>
+<div class="fbar" id="shelf-fbar"></div>
+<div class="grid" id="shelf-grid"></div>
+</div>
+
+<div id="r-view">
+<div class="prog"><div class="prog-fill" id="prog-fill"></div></div>
+<nav class="toc">
+<div class="toc-h"><div class="toc-book">&#128218; 读书笔记</div><div class="toc-author" id="toc-author">&#8212;</div></div>
+<div class="toc-nav" id="toc-nav-list"></div>
+<div class="toc-back"><button class="toc-back-btn" onclick="showShelf()">&#8592; 返回书架</button></div>
+</nav>
+<div class="r-content" id="reader-content"></div>
+</div>
+
+<button class="back-top" id="back-top-btn" onclick="document.getElementById('reader-content').scrollTo({top:0,behavior:'smooth'})">&#8593;</button>
+<footer>&#128218; 读书笔记 &nbsp;&middot;&nbsp; Keep Reading, Keep Thinking &nbsp;&middot;&nbsp; 2026</footer>
+
+<script>
+var TOC_HTML = "<div class=\"toc-item\" onclick=\"showSec('-抗炎生活-完整读书笔记')\">《抗炎生活》完整读书笔记</div>\n<div class=\"toc-item\" onclick=\"showSec('第一章-多病体质和健康的人差在哪儿-')\">第一章：多病体质和健康的人差在哪儿？</div>\n<div class=\"toc-item\" onclick=\"showSec('第二章-从疾病类别看体内发炎')\">第二章：从疾病类别看体内发炎</div>\n<div class=\"toc-item\" onclick=\"showSec('第三章-肥胖是炎症的-温床-')\">第三章：肥胖是炎症的\"温床\"</div>\n<div class=\"toc-item\" onclick=\"showSec('第四章-对策--抑制发炎的健康饮食法')\">第四章：对策❶ 抑制发炎的健康饮食法</div>\n<div class=\"toc-item\" onclick=\"showSec('第五章-对策--抑制炎症的生活小贴士')\">第五章：对策❷ 抑制炎症的生活小贴士</div>\n<div class=\"toc-item\" onclick=\"showSec('抗炎生活习惯汇总')\">抗炎生活习惯汇总</div>\n<div class=\"toc-item\" onclick=\"showSec('核心知识点总结')\">核心知识点总结</div>\n<div class=\"toc-item\" onclick=\"showSec('常见问题-Q-A')\">常见问题 Q&A</div>\n<div class=\"toc-item\" onclick=\"showSec('附录-全书金句摘录')\">附录：全书金句摘录</div>";
+var SECTIONS_HTML = "<div class=\"sec\" id=\"sec--抗炎生活-完整读书笔记\"><div class=\"cover-page\"><div class=\"cover-icon\">&#127807;</div><h1>《抗炎生活》完整读书笔记</h1><p class=\"cover-sub\">慢性炎症远离你，健康长寿很简单</p><p class=\"cover-author\">作者：[日] 池谷敏郎</p><p class=\"cover-author\" style=\"color:var(--text2)\">整理：小五Q</p><p class=\"cover-date\">完整版读书笔记 &middot; 2026</p><div class=\"cover-stats\"><div class=\"cover-stat\"><div class=\"n\">5</div><div class=\"l\">核心章节</div></div><div class=\"cover-stat\"><div class=\"n\">28</div><div class=\"l\">知识点</div></div><div class=\"cover-stat\"><div class=\"n\">8</div><div class=\"l\">金句</div></div><div class=\"cover-stat\"><div class=\"n\">9</div><div class=\"l\">每日行动</div></div></div></div></div>\n<div class=\"sec\" id=\"sec-第一章-多病体质和健康的人差在哪儿-\"><div class=\"ch-header\"><div class=\"ch-eyebrow\">第一章</div><h2>第一章：多病体质和健康的人差在哪儿？</h2></div><div class=\"doc-body\"><h1>第一章：多病体质和健康的人差在哪儿？</h1>\n<blockquote>关键观点：体内\"慢性炎症\"的程度不同，决定了健康与否</blockquote>\n<h2>1.1 炎症也有好坏之分</h2>\n<h3>炎症的定义</h3>\n<p>当我们的身体遇到有害物质的攻击时，免疫系统做出一系列反应去抵抗、清除有害物质，这个过程称之为<strong>炎症</strong>。</p>\n<h3>炎症的四大特征</h3>\n<div class=\"table-wrap\"><table>\n<tr><th>特征</th><th>表现</th><th>原理</th></tr>\n<tr><td>🔴 发红</td><td>患处血管扩张</td><td>血流量增加</td></tr>\n<tr><td>⚫ 肿胀</td><td>血管通透性增加</td><td>液体渗出</td></tr>\n<tr><td>🟠 发热</td><td>局部代谢增强</td><td>产热增加</td></tr>\n<tr><td>⚡ 疼痛</td><td>炎症介质刺激神经</td><td>不适感</td></tr>\n</table></div>\n<h3>核心结论</h3>\n<blockquote><strong>炎症本身无害，但若是慢性炎症就不妙了。</strong></blockquote>\n<ul><li><strong>急性炎症</strong>：伴随红、肿、热、痛等显著症状出现并快速消退</li><li><strong>慢性炎症</strong>：长时间持续对人体造成影响，不易察觉，被忽视后发现时往往已造成不可控制的后果</li></ul>\n<hr>\n<h2>1.2 无视闷烧（慢性炎症）蔓延，就会引发大火（重大疾病）</h2>\n<h3>\"闷烧\"比喻</h3>\n<p>慢性炎症就像身体内部持续的\"小火苗\"——不易察觉，却持续损害健康。</p>\n<h3>防患要趁未然</h3>\n<blockquote>能否提早抑制慢性炎症，将决定你一生是否健康、长寿、美丽。</blockquote>\n<hr>\n<h2>1.3 当慢性炎症在全身蔓延，后果不堪设想</h2>\n<h3>牙周病的例子</h3>\n<p>牙龈流血不是小事——<strong>牙周病的真面目</strong>是慢性炎症在口腔内的表现，炎症因子会通过血管流遍全身，引发其他部位的炎症。</p>\n<hr></div></div>\n<div class=\"sec\" id=\"sec-第二章-从疾病类别看体内发炎\"><div class=\"ch-header alt\"><div class=\"ch-eyebrow\">第二章</div><h2>第二章：从疾病类别看体内发炎</h2></div><div class=\"doc-body\"><h1>第二章：从疾病类别看体内发炎</h1>\n<blockquote>关键观点：许多看似无关的疾病，背后都与慢性炎症有关</blockquote>\n<h2>2.1 动脉硬化</h2>\n<h3>炎症与动脉硬化</h3>\n<ul><li>血管内皮受损 → 炎症反应 → 脂质沉积 → 动脉粥样硬化</li><li>斑块形成 → 血管狭窄 → 心脏病、脑卒中</li></ul>\n<h3>炎症标志物</h3>\n<ul><li><strong>TNF-α</strong>（肿瘤坏死因子-α）</li><li><strong>白细胞介素-6</strong>（IL-6）</li><li><strong>C反应蛋白</strong>（CRP）</li></ul>\n<hr>\n<h2>2.2 肠道疾病</h2>\n<h3>相关疾病</h3>\n<ul><li>肠炎</li><li>大肠癌</li><li>溃疡性结肠炎</li><li>克罗恩病</li></ul>\n<h3>机制</h3>\n<p>肠道是人体最大的免疫器官，肠道炎症与全身炎症密切相关。</p>\n<hr>\n<h2>2.3 癌症</h2>\n<h3>炎症与癌症的关系</h3>\n<ul><li>长期慢性炎症 → 细胞损伤 → DNA变异 → 癌细胞增殖</li><li>炎症环境为癌细胞提供生长温床</li></ul>\n<hr>\n<h2>2.4 抑郁症</h2>\n<h3>重要发现</h3>\n<blockquote>抑郁症也是一种炎症性疾病。</blockquote>\n<h3>机制</h3>\n<ul><li>炎症因子（TNF-α、IL-6）影响大脑神经递质（如血清素）的合成和功能</li><li>慢性炎症影响情绪调节中枢</li></ul>\n<hr>\n<h2>2.5 痴呆（阿尔茨海默病）</h2>\n<h3>炎症与认知功能</h3>\n<ul><li>脑部慢性炎症 → 神经细胞损伤 → 认知功能下降</li><li>tau蛋白异常磷酸化与炎症相关</li></ul>\n<hr>\n<h2>2.6 特应性皮炎</h2>\n<h3>炎症性皮肤病</h3>\n<ul><li>皮肤屏障功能障碍 → 炎症反应 → 瘙痒、皮疹</li><li>与免疫系统过度反应相关</li></ul>\n<hr>\n<h2>2.7 支气管哮喘</h2>\n<h3>气道炎症</h3>\n<ul><li>气道慢性炎症 → 平滑肌收缩 → 呼吸困难</li><li>过敏原诱发炎症反应</li></ul>\n<hr>\n<h2>2.8 花粉过敏（非常重要！）</h2>\n<h3>花粉过敏 = 身体的过度防御</h3>\n<p><strong>什么是花粉过敏？</strong></p>\n<p>当免疫系统误认为花粉是\"敌人\"时，会产生抗体和炎症介质来\"清除\"花粉，这种过度的应激反应就是过敏。</p>\n<p><strong>花粉过敏的症状：</strong></p>\n<div class=\"table-wrap\"><table>\n<tr><th>部位</th><th>症状</th></tr>\n<tr><td>👀 眼部</td><td>发痒、流泪、眼结膜水肿、眼睑红肿</td></tr>\n<tr><td>👃 鼻腔</td><td>发痒、连续打喷嚏、流鼻涕</td></tr>\n<tr><td>🗣️ 咽喉</td><td>发痒、咽干、干咳</td></tr>\n<tr><td>🫁 严重时</td><td>引发哮喘</td></tr>\n</table></div>\n<h3>花生过敏 vs 炎症</h3>\n<ul><li>两者都是免疫系统的过度反应</li><li>都是身体对\"异物\"的过激防御</li><li>本质上都是慢性炎症的表现形式</li></ul>\n<h3>治疗原则</h3>\n<ul><li><strong>避免接触过敏原</strong>——戴口罩、关闭门窗</li><li><strong>药物治疗</strong>——抗组胺药、鼻用糖皮质激素</li><li><strong>脱敏治疗</strong>——从根本上改变免疫反应</li></ul>\n<hr>\n<h2>第二章总结：疾病关联图</h2>\n<p><code>`</code></p>\n<p>慢性炎症</p>\n<p>│</p>\n<p>┌────────┬─────────┼─────────┬────────┐</p>\n<p>│        │         │         │        │</p>\n<p>▼        ▼         ▼         ▼        ▼</p>\n<p>动脉    肠道     癌症    抑郁    痴呆</p>\n<p>硬化    疾病     │        │        │</p>\n<p>特应性  支气管  花粉</p>\n<p>皮炎    哮喘    过敏</p>\n<p><code>`</code></p>\n<hr></div></div>\n<div class=\"sec\" id=\"sec-第三章-肥胖是炎症的-温床-\"><div class=\"ch-header\"><div class=\"ch-eyebrow\">第三章</div><h2>第三章：肥胖是炎症的\"温床\"</h2></div><div class=\"doc-body\"><h1>第三章：肥胖是炎症的\"温床\"</h1>\n<blockquote>关键观点：人越胖，体内\"闷烧\"就越严重</blockquote>\n<h2>3.1 脂肪组织的双重性</h2>\n<h3>脂肪组织不只是储能</h3>\n<p>脂肪组织（尤其是内脏脂肪）是一个<strong>活跃的内分泌器官</strong>，会分泌多种生物活性物质。</p>\n<h3>促炎因子 vs 抗炎因子</h3>\n<div class=\"table-wrap\"><table>\n<tr><th>类型</th><th>名称</th><th>作用</th></tr>\n<tr><td><strong>促炎因子</strong></td><td>TNF-α</td><td>随肥胖程度增加</td></tr>\n<tr><td><strong>促炎因子</strong></td><td>白细胞介素-6</td><td>随肥胖程度增加</td></tr>\n<tr><td><strong>促炎因子</strong></td><td>抵抗素(Resistin)</td><td>随肥胖程度增加</td></tr>\n<tr><td><strong>抗炎因子</strong></td><td>脂联素(Adiponectin)</td><td>抑制炎症，保护血管</td></tr>\n</table></div>\n<h3>问题</h3>\n<blockquote>肥胖者体内<strong>脂联素分泌减少</strong>，而<strong>促炎因子分泌增加</strong>，形成促炎环境。</blockquote>\n<hr>\n<h2>3.2 异位脂肪的危险</h2>\n<h3>什么是异位脂肪？</h3>\n<p>脂肪不应该存储的部位积累了脂肪：</p>\n<ul><li><strong>心脏周围</strong>（心外膜脂肪）</li><li><strong>肝脏</strong>（脂肪肝）</li><li><strong>肌肉</strong>（肌间脂肪）</li></ul>\n<h3>心脏周围脂肪的危险</h3>\n<blockquote>当异位脂肪附着到心脏，冠状动脉就危险了！</blockquote>\n<ul><li>心外膜脂肪直接包裹心脏</li><li>释放炎症因子影响冠状动脉</li><li>增加心血管疾病风险</li></ul>\n<hr>\n<h2>3.3 减肥是最有效的抗炎\"药\"</h2>\n<h3>核心结论</h3>\n<blockquote><strong>减肥 = 抗炎</strong></blockquote>\n<h3>减肥的抗炎机制</h3>\n<ul><li>减少促炎因子分泌</li><li>增加脂联素分泌</li><li>降低全身炎症水平</li></ul>\n<h3>目标BMI</h3>\n<ul><li>健康范围：<strong>18.5 ≤ BMI < 24</strong></li></ul>\n<hr></div></div>\n<div class=\"sec\" id=\"sec-第四章-对策--抑制发炎的健康饮食法\"><div class=\"ch-header alt\"><div class=\"ch-eyebrow\">第四章</div><h2>第四章：对策❶ 抑制发炎的健康饮食法</h2></div><div class=\"doc-body\"><h1>第四章：对策❶ 抑制发炎的健康饮食法</h1>\n<blockquote>关键观点：吃什么、怎么吃，直接影响体内炎症水平</blockquote>\n<h2>4.1 炎症会随着年龄增长而恶化</h2>\n<h3>年龄因素</h3>\n<ul><li>代谢率下降</li><li>氧化应激累积</li><li>免疫功能衰退</li></ul>\n<hr>\n<h2>4.2 EPA和DHA可抑制慢性炎症</h2>\n<h3>Omega-3 脂肪酸的功效</h3>\n<div class=\"table-wrap\"><table>\n<tr><th>成分</th><th>全称</th><th>主要功效</th></tr>\n<tr><td><strong>EPA</strong></td><td>二十碳五烯酸</td><td>抗炎、降血脂、保护心血管</td></tr>\n<tr><td><strong>DHA</strong></td><td>二十二碳六烯酸</td><td>神经再生、改善认知、保护大脑</td></tr>\n</table></div>\n<h3>作用机制</h3>\n<ul><li>抑制炎症因子产生</li><li>促进抗炎介质生成</li><li>调节免疫平衡</li></ul>\n<hr>\n<h2>4.3 理想比例：EPA : AA = 1 : 1</h2>\n<h3>AA（花生四烯酸）</h3>\n<ul><li>Omega-6 系列脂肪酸</li><li>在体内可转化为促炎物质</li><li>主要存在于肉类、蛋奶制品中</li></ul>\n<h3>现实问题</h3>\n<p>现代人饮食中 <strong>EPA 严重不足</strong>，AA/EPA 比例严重失衡（往往高达 10:1 或更高）。</p>\n<hr>\n<h2>4.4 色拉油会促炎，亚麻籽油则能抑制炎症</h2>\n<h3>食用油的选择</h3>\n<div class=\"table-wrap\"><table>\n<tr><th>食用油</th><th>类型</th><th>对炎症的影响</th></tr>\n<tr><td><strong>色拉油（大豆油、玉米油）</strong></td><td>富含Omega-6</td><td>❌ 促进炎症</td></tr>\n<tr><td><strong>亚麻籽油</strong></td><td>富含α-亚麻酸(ALA)</td><td>✅ 抑制炎症</td></tr>\n<tr><td><strong>紫苏籽油</strong></td><td>富含α-亚麻酸(ALA)</td><td>✅ 抑制炎症</td></tr>\n<tr><td><strong>橄榄油</strong></td><td>富含单不饱和脂肪酸</td><td>✅ 抗炎（特级初榨）</td></tr>\n<tr><td><strong>核桃油</strong></td><td>含Omega-3</td><td>✅ 抗炎</td></tr>\n</table></div>\n<h3>黄金比例</h3>\n<blockquote><strong>Omega-3 : Omega-6 : Omega-9 = 1 : 4 : 1</strong></blockquote>\n<hr>\n<h2>4.5 现代人的EPA、DHA都摄入不足</h2>\n<h3>深海鱼类推荐</h3>\n<div class=\"table-wrap\"><table>\n<tr><th>鱼类</th><th>Omega-3含量</th></tr>\n<tr><td>🐟 鲭鱼</td><td>高</td></tr>\n<tr><td>🐟 秋刀鱼</td><td>高</td></tr>\n<tr><td>🐟 三文鱼</td><td>高</td></tr>\n<tr><td>🐟 沙丁鱼</td><td>高</td></tr>\n<tr><td>🐟 鲔鱼（金枪鱼）</td><td>中高</td></tr>\n<tr><td>🐟 银鲑鱼</td><td>高</td></tr>\n<tr><td>🐟 鲣鱼</td><td>中</td></tr>\n<tr><td>🐟 海鲈鱼</td><td>中</td></tr>\n<tr><td>🐟 竹荚鱼</td><td>中</td></tr>\n</table></div>\n<h3>建议</h3>\n<ul><li>每周至少吃 <strong>2-3次</strong> 深海鱼</li><li>每次 <strong>100-150g</strong> 左右</li></ul>\n<hr>\n<h2>4.6 匠心饮食，抑制炎症</h2>\n<h3>烹饪方式建议</h3>\n<div class=\"table-wrap\"><table>\n<tr><th>推荐方式</th><th>原因</th></tr>\n<tr><td>🐟 清蒸</td><td>保留Omega-3</td></tr>\n<tr><td>🥗 凉拌（亚麻籽油）</td><td>保留活性</td></tr>\n<tr><td>🥬 水煮</td><td>保持蔬菜抗氧化能力</td></tr>\n</table></div>\n<h3>不推荐方式</h3>\n<div class=\"table-wrap\"><table>\n<tr><th>避免方式</th><th>原因</th></tr>\n<tr><td>🍳 高温油炸</td><td>产生反式脂肪酸，加剧炎症</td></tr>\n<tr><td>🔥 过度加热Omega-3油</td><td>破坏活性成分</td></tr>\n</table></div>\n<hr>\n<h2>4.7 抗氧化能力较强的蔬菜</h2>\n<h3>抗炎蔬菜推荐</h3>\n<div class=\"table-wrap\"><table>\n<tr><th>蔬菜</th><th>关键营养素</th></tr>\n<tr><td>🥦 西兰花</td><td>维生素C、萝卜硫素</td></tr>\n<tr><td>🥬 菠菜</td><td>叶酸、维生素E</td></tr>\n<tr><td>🍄 香菇</td><td>β-葡聚糖、香菇多糖</td></tr>\n<tr><td>🥒 苦瓜</td><td>苦瓜苷</td></tr>\n<tr><td>🌶️ 彩椒</td><td>维生素C、维生素E</td></tr>\n<tr><td>🧅 洋葱</td><td>槲皮素</td></tr>\n<tr><td>🧄 蒜</td><td>大蒜素</td></tr>\n<tr><td>🥑 牛油果</td><td>单不饱和脂肪酸</td></tr>\n</table></div>\n<h3>原则</h3>\n<blockquote>深色蔬菜抗氧化能力更强，建议每天摄入 <strong>5种以上</strong> 蔬菜。</blockquote>\n<hr>\n<h2>4.8 \"大自然的恩惠\"，连皮带籽完整享用</h2>\n<h3>完整食物的例子</h3>\n<div class=\"table-wrap\"><table>\n<tr><th>食物</th><th>吃法</th><th>营养亮点</th></tr>\n<tr><td>🍎 苹果</td><td>带皮</td><td>果胶、维生素</td></tr>\n<tr><td>🍇 葡萄</td><td>带籽</td><td>白藜芦醇、花青素</td></tr>\n<tr><td>🥒 黄瓜</td><td>带皮</td><td>硅、维生素</td></tr>\n<tr><td>🌾 全谷物</td><td>完整</td><td>膳食纤维、B族维生素</td></tr>\n</table></div>\n<hr></div></div>\n<div class=\"sec\" id=\"sec-第五章-对策--抑制炎症的生活小贴士\"><div class=\"ch-header\"><div class=\"ch-eyebrow\">第五章</div><h2>第五章：对策❷ 抑制炎症的生活小贴士</h2></div><div class=\"doc-body\"><h1>第五章：对策❷ 抑制炎症的生活小贴士</h1>\n<blockquote>关键观点：除了饮食，生活习惯同样重要</blockquote>\n<h2>5.1 体内的慢性炎症，会随着年龄增长而恶化</h2>\n<h3>年龄与炎症</h3>\n<ul><li>代谢废物累积</li><li>氧化应激增加</li><li>端粒缩短</li></ul>\n<hr>\n<h2>5.2 EPA、DHA可抑制慢性炎症</h2>\n<p>（与第四章内容呼应，强调补充Omega-3的重要性）</p>\n<hr>\n<h2>5.3 理想比例是\"EPA:AA=1:1\"</h2>\n<h3>如何达到目标比例</h3>\n<ul><li><strong>减少</strong> Omega-6 摄入（减少油炸食品、动物内脏）</li><li><strong>增加</strong> Omega-3 摄入（深海鱼、亚麻籽油）</li><li><strong>补充</strong> EPA/DHA 制剂（鱼油、海藻油）</li></ul>\n<hr>\n<h2>5.4 色拉油会促进炎症，亚麻籽油则能抑制炎症</h2>\n<h3>实践建议</h3>\n<ul><li>用 <strong>亚麻籽油、紫苏籽油</strong> 替代部分色拉油</li><li>凉拌菜用特级初榨橄榄油</li><li>避免高温油炸</li></ul>\n<hr>\n<h2>5.5 现代人的EPA、DHA都摄入不足</h2>\n<h3>补充建议</h3>\n<ul><li>多吃深海鱼</li><li>每天一把坚果（核桃、杏仁）</li><li>适量补充鱼油补充剂</li></ul>\n<hr>\n<h2>5.6 少吃甜食、油炸物，别让反式脂肪酸害你生病</h2>\n<h3>促炎食物黑名单</h3>\n<div class=\"table-wrap\"><table>\n<tr><th>食物</th><th>危害</th></tr>\n<tr><td>🍩 甜食</td><td>血糖波动→炎症</td></tr>\n<tr><td>🍟 油炸食品</td><td>反式脂肪、Omega-6过多</td></tr>\n<tr><td>🍞 白米白面</td><td>升糖快、缺乏纤维</td></tr>\n<tr><td>🥩 加工肉</td><td>添加剂、防腐剂</td></tr>\n<tr><td>🧈 人造奶油</td><td>反式脂肪</td></tr>\n</table></div>\n<hr>\n<h2>5.7 抗氧化能力较强的蔬菜，抗炎能力也较高</h2>\n<h3>蔬菜摄入建议</h3>\n<ul><li>每天至少 <strong>300-500g</strong> 蔬菜</li><li>其中 <strong>深色蔬菜</strong> 占一半以上</li></ul>\n<hr>\n<h2>5.8 既然是\"大自然的恩惠\"，就要连皮带籽完整享用</h2>\n<h3>全食物原则</h3>\n<ul><li>吃 <strong>完整的食物</strong>，不加工过度</li><li>保留食物的 <strong>天然纤维</strong> 和 <strong>植物化合物</strong></li></ul>\n<hr>\n<h2>5.9 利用中药改变体质，告别炎症</h2>\n<h3>中药调理（参考）</h3>\n<ul><li><strong>黄芪</strong>——补气固表</li><li><strong>茯苓</strong>——健脾利湿</li><li><strong>薏苡仁</strong>——清热祛湿</li><li><strong>山药</strong>——补脾益肺</li></ul>\n<blockquote>注：具体用药请咨询中医师</blockquote>\n<hr></div></div>\n<div class=\"sec\" id=\"sec-抗炎生活习惯汇总\"><div class=\"ch-header alt\"><div class=\"ch-eyebrow\"></div><h2>抗炎生活习惯汇总</h2></div><div class=\"doc-body\"><h1>抗炎生活习惯汇总</h1>\n<h2>🏃 运动抗炎</h2>\n<h3>建议</h3>\n<ul><li>每周 <strong>150分钟</strong> 中等强度运动</li><li>或每周 <strong>75分钟</strong> 高强度运动</li></ul>\n<h3>推荐运动</h3>\n<div class=\"table-wrap\"><table>\n<tr><th>运动</th><th>抗炎效果</th></tr>\n<tr><td>🚶 步行</td><td>促进循环</td></tr>\n<tr><td>🏊 游泳</td><td>全身运动</td></tr>\n<tr><td>🧘 瑜伽</td><td>减压</td></tr>\n<tr><td>🚴 骑行</td><td>有氧</td></tr>\n</table></div>\n<h3>三分钟简单体操</h3>\n<p>书中推荐简单体操，随时随地活动身体。</p>\n<hr>\n<h2>😴 睡眠抗炎</h2>\n<h3>机制</h3>\n<ul><li>睡眠时身体进行自我修复</li><li>生长激素分泌高峰</li><li>炎症因子清除</li></ul>\n<h3>建议</h3>\n<ul><li>每天 <strong>7-8小时</strong> 优质睡眠</li><li>固定作息时间</li></ul>\n<hr>\n<h2>🧘 压力管理</h2>\n<h3>压力 = 炎症</h3>\n<blockquote>焦虑等于\"同时抽三根香烟\"的自虐行为。</blockquote>\n<h3>机制</h3>\n<ul><li>压力 → 皮质醇升高 → 炎症反应增强</li><li>慢性压力持续刺激免疫系统</li></ul>\n<h3>减压方法</h3>\n<div class=\"table-wrap\"><table>\n<tr><th>方法</th><th>效果</th></tr>\n<tr><td>🧘 冥想</td><td>降低皮质醇</td></tr>\n<tr><td>�深呼吸</td><td>放松神经</td></tr>\n<tr><td>🎵 音乐</td><td>舒缓情绪</td></tr>\n<tr><td>🏞️ 自然</td><td>降低压力激素</td></tr>\n</table></div>\n<hr>\n<h2>🚬 戒烟就是在抗炎</h2>\n<h3>吸烟的危害</h3>\n<ul><li>产生大量活性氧</li><li>损伤血管内皮</li><li>诱发全身炎症</li></ul>\n<h3>戒烟好处</h3>\n<ul><li>24小时内：血压下降</li><li>1周后：味觉改善</li><li>1个月后：皮肤改善</li><li>1年后：心血管疾病风险下降</li></ul>\n<hr>\n<h2>📊 2:1:7 健康法则</h2>\n<p>这是书中提出的健康饮食法则：</p>\n<h3>水果 : 蔬菜 : 主食 = 2 : 1 : 7</h3>\n<h3>水果推荐</h3>\n<ul><li>🍊 橘子</li><li>🍓 草莓</li><li>🍇 无花果</li></ul>\n<h3>推荐蔬菜</h3>\n<ul><li>🫛 魔芋</li><li>🍄 香菇</li><li>🥒 秋葵</li><li>🐟 鱼头</li><li>🌿 海藻</li></ul>\n<hr></div></div>\n<div class=\"sec\" id=\"sec-核心知识点总结\"><div class=\"ch-header\"><div class=\"ch-eyebrow\"></div><h2>核心知识点总结</h2></div><div class=\"doc-body\"><h1>核心知识点总结</h1>\n<h2>🔑 记住这3点</h2>\n<p><code>`</code></p>\n<ul><li>炎症 = 氧化 = 衰老 = 疾病</li></ul>\n<ul><li>抗炎 = 抗氧 = 补 Omega-3</li></ul>\n<ul><li>不用吃药，从吃对油开始</li></ul>\n<p><code>`</code></p>\n<h2>📋 每日行动清单</h2>\n<p><code>`</code></p>\n<p>☐ 食用油换成橄榄油或亚麻籽油</p>\n<p>☐ 吃一份深海鱼</p>\n<p>☐ 吃5种以上蔬菜</p>\n<p>☐ 主食加一半粗粮</p>\n<p>☐ 每天一把坚果</p>\n<p>☐ 步行30分钟</p>\n<p>☐ 保证7小时睡眠</p>\n<p>☐ 学会放松减压</p>\n<p>☐ 戒烟</p>\n<p><code>`</code></p>\n<h2>🎯 核心公式</h2>\n<blockquote><strong>抗炎 = 抗疲劳 + 抗衰老 + 抗压 + 日常防癌</strong></blockquote>\n<hr></div></div>\n<div class=\"sec\" id=\"sec-常见问题-Q-A\"><div class=\"ch-header alt\"><div class=\"ch-eyebrow\"></div><h2>常见问题 Q&A</h2></div><div class=\"doc-body\"><h1>常见问题 Q&A</h1>\n<h2>Q1: 花生过敏和炎症有什么关系？</h2>\n<p>A: 两者都是免疫系统的过度反应。过敏是免疫系统对无害物质（如花粉、花生）产生过激防御，本质上与慢性炎症相关。</p>\n<h2>Q2: 牙龈出血和心脏病有什么关系？</h2>\n<p>A: 牙周病的炎症因子会进入血液循环，影响全身血管健康，研究显示牙周炎与心血管疾病密切相关。</p>\n<h2>Q3: 压力大真的会导致炎症吗？</h2>\n<p>A: 是的。慢性压力会导致皮质醇长期升高，抑制免疫功能，同时增加促炎因子分泌。</p>\n<h2>Q4: 减肥需要达到什么目标？</h2>\n<p>A: BMI控制在18.5-24范围内，特别是减少内脏脂肪（腹部肥胖）对抗炎最重要。</p>\n<h2>Q5: 鱼油和亚麻籽油有什么区别？</h2>\n<p>A: 鱼油含EPA和DHA（直接可用），亚麻籽油含α-亚麻酸（需在体内转化，转化率约5-10%）。</p>\n<hr></div></div>\n<div class=\"sec\" id=\"sec-附录-全书金句摘录\"><div class=\"ch-header\"><div class=\"ch-eyebrow\"></div><h2>附录：全书金句摘录</h2></div><div class=\"doc-body\"><h1>附录：全书金句摘录</h1>\n<div class=\"quote-item\"><p>1. \"能否提早抑制慢性炎症，将决定你一生是否健康、长寿、美丽。\"</p></div>\n<div class=\"quote-item\"><p>2. \"抗炎要趁早！\"</p></div>\n<div class=\"quote-item\"><p>3. \"炎症本身无害，但若是慢性炎症就不妙了。\"</p></div>\n<div class=\"quote-item\"><p>4. \"虽然年龄增长所伴随的不可抗拒因素，以及其他许多现代医学无法解决的复杂问题，都是造成人体发炎的原因，但还是有许多'可及时抑制的发炎症状'，能够通过改善生活习惯而避免。\"</p></div>\n<div class=\"quote-item\"><p>5. \"不需要太辛苦，也不需要昂贵的化妆品和美容整形，只要每天孜孜不倦地践行健康的生活方式，衰老是可以阻止的。\"</p></div>\n<div class=\"quote-item\"><p>6. \"焦虑等于'同时抽三根香烟'的自虐行为。\"</p></div>\n<div class=\"quote-item\"><p>7. \"戒烟就是在抗炎。\"</p></div>\n<div class=\"quote-item\"><p>8. \"减肥是最有效的抗炎'药'。\"</p></div>\n<hr>\n<p>*笔记版本：完整版 v1.0 | 2026-03-24*</p>\n<p>*基于《抗炎生活》[日]池谷敏郎 著*</p></div></div>";
+var START_ID = "\u7b2c\u4e00\u7ae0-\u591a\u75c5\u4f53\u8d28\u548c\u5065\u5eb7\u7684\u4eba\u5dee\u5728\u54ea\u513f-";
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('toc-nav-list').innerHTML = TOC_HTML;
+    document.getElementById('reader-content').innerHTML = SECTIONS_HTML;
+    animateStats();
+
+    var rc = document.getElementById('reader-content');
+    rc.addEventListener('scroll', function() {
+        var fill = document.getElementById('prog-fill');
+        var max = rc.scrollHeight - rc.clientHeight;
+        fill.style.width = max > 0 ? (rc.scrollTop / max * 100) + '%' : '0%';
+        document.getElementById('back-top-btn').style.display = rc.scrollTop > 400 ? 'flex' : 'none';
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (!document.getElementById('r-view').classList.contains('on')) return;
+        if (e.key === 'ArrowDown' || e.key === 'j') rc.scrollBy({top: 80, behavior: 'smooth'});
+        if (e.key === 'ArrowUp' || e.key === 'k') rc.scrollBy({top: -80, behavior: 'smooth'});
+        if (e.key === 'Escape') showShelf();
+    });
+});
+
+function renderShelf() {
+    var books = [{id:1,title:'抗炎生活',author:'【日】池谷敏郎',category:'健康',icon:'🌻',rating:5,tags:['健康','抗炎','生活方式'],desc:'心血管疾病权威专家教你认识慢性炎症，从饮食和生活两方面抑制它。',coverBg:'linear-gradient(145deg,#1e3a5f,#0f172a)'}];
+    var html = books.map(function(b) {
+        var stars = Array(b.rating).fill('★').join('') + '☆';
+        var tags = b.tags.map(function(t) { return '<span class="bktag">#' + t + '</span>'; }).join('');
+        return '<div class="bkcard" onclick="openBook(' + b.id + ')">' +
+            '<div class="bkcv" style="background:' + b.coverBg + '">' +
+            '<div class="ptn" style="color:#fff"></div>' +
+            '<div class="ic">' + b.icon + '</div>' +
+            '<div class="ti">' + b.title + '</div></div>' +
+            '<div class="bkbody">' +
+            '<div class="bkmeta"><span class="bkcat">' + b.category + '</span><span class="bkrating">' + stars + '</span></div>' +
+            '<div class="bkauthor">' + b.author + '</div>' +
+            '<p class="bkdesc">' + b.desc + '</p>' +
+            '<button class="bkbtn" onclick="event.stopPropagation();openBook(' + b.id + ')">📊 开始阅读</button></div>' +
+            '<div class="bkfooter">' + tags + '</div></div>';
+    }).join('');
+    document.getElementById('shelf-grid').innerHTML = html;
+}
+
+function openBook(id) {
+    window.curBook = {id: id, title: '抗炎生活'};
+    document.getElementById('toc-author').textContent = '抗炎生活';
+    document.getElementById('shelf-view').classList.add('hidden');
+    document.getElementById('r-view').classList.add('on');
+    document.getElementById('nav-back').style.display = '';
+    document.getElementById('nav-toc').classList.add('active');
+    document.getElementById('nav-shelf').classList.remove('active');
+    document.getElementById('back-top-btn').style.display = 'none';
+    document.getElementById('reader-content').scrollTop = 0;
+    document.getElementById('prog-fill').style.width = '0%';
+    var first = document.querySelector('.toc-item');
+    if (first) {
+        [].slice.call(document.querySelectorAll('.toc-item')).forEach(function(el){el.classList.remove('on');});
+        first.classList.add('on');
+    }
+}
+
+function showShelf() {
+    document.getElementById('shelf-view').classList.remove('hidden');
+    document.getElementById('r-view').classList.remove('on');
+    document.getElementById('nav-back').style.display = 'none';
+    document.getElementById('nav-shelf').classList.add('active');
+    document.getElementById('nav-toc').classList.remove('active');
+    window.curBook = null;
+}
+
+function showSec(id) {
+    var el = document.getElementById('sec-' + id);
+    if (!el) return;
+    var rc = document.getElementById('reader-content');
+    rc.scrollTo({top: el.offsetTop - 20, behavior: 'smooth'});
+    [].slice.call(document.querySelectorAll('.toc-item')).forEach(function(el){el.classList.remove('on');});
+    [].slice.call(document.querySelectorAll('.toc-item')).forEach(function(el){
+        var eid = el.textContent.replace(/\s+/g, '');
+        var tid = id.replace(/\s+/g, '');
+        if (eid.indexOf(tid) >= 0 || tid.indexOf(eid) >= 0) el.classList.add('on');
+    });
+}
+
+function animateStats() {
+    renderShelf();
+    var cur = 0;
+    var iv = setInterval(function() {
+        cur = Math.min(cur + 1, 1);
+        document.getElementById('s-books').textContent = cur;
+        if (cur >= 1) clearInterval(iv);
+    }, 100);
+    document.getElementById('s-notes').textContent = 28;
+}
+</script>
+</body>
+</html>
